@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>diario di pesca</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior: none; }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); transform: scale(1.5); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const Fish = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5M16 17.5v1M13 20v2M10 20v2M7 17.5v1M6 12v.5"/></svg>;
+        const Cloud = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>;
+        const Wrench = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>;
+        const BarChart3 = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3v18h18M13 17V9m-4 8V5m8 12v-4"/></svg>;
+        const ChevronDown = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>;
+        const ChevronUp = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>;
+        const Plus = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14m-7-7v14"/></svg>;
+        const Trash2 = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>;
+        const Edit = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+
+        const InputField = ({ label, value, onChange, type = "text", placeholder = "" }) => (
+            <div className="mb-4">
+                <label className="block text-cyan-400 text-sm font-semibold mb-2">{label}</label>
+                <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+                    className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white text-lg focus:border-cyan-500 focus:outline-none" style={{colorScheme: 'dark'}} />
+            </div>
+        );
+
+        const SelectField = ({ label, value, onChange, options, placeholder }) => (
+            <div className="mb-4">
+                <label className="block text-cyan-400 text-sm font-semibold mb-2">{label}</label>
+                <input list={`${label}-list`} value={value} onChange={onChange} placeholder={placeholder}
+                    className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white text-lg focus:border-cyan-500 focus:outline-none" />
+                <datalist id={`${label}-list`}>{options.map((opt, i) => <option key={i} value={opt} />)}</datalist>
+            </div>
+        );
+
+        const Section = ({ icon: Icon, title, isActive, onToggle, children }) => (
+            <div className="mb-4 rounded-xl overflow-hidden bg-gray-900 border-2 border-gray-700">
+                <button onClick={onToggle} className="w-full flex items-center justify-between p-5 active:bg-gray-800">
+                    <div className="flex items-center gap-4">
+                        <Icon className="text-cyan-400" width={28} height={28} />
+                        <h2 className="text-2xl font-bold text-white">{title}</h2>
+                    </div>
+                    {isActive ? <ChevronUp className="text-cyan-400" width={28} height={28} /> : <ChevronDown className="text-cyan-400" width={28} height={28} />}
+                </button>
+                {isActive && <div className="p-6 border-t-2 border-gray-700 bg-black/30">{children}</div>}
+            </div>
+        );
+
+        function DiarioPesca() {
+            const [activeSection, setActiveSection] = useState(null);
+            
+            const [catture, setCatture] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_catture');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [specieMemorizzate, setSpecieMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_specie');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [escheMemorizzate, setEscheMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_esche');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [localitaMemorizzate, setLocalitaMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_localita');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [noteMemorizzate, setNoteMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_note');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [canneMemorizzate, setCanneMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_canne');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [traviMemorizzate, setTraviMemorizzate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_travi');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [amiMemorizzati, setAmiMemorizzati] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_ami');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [piombiMemorizzati, setPiombiMemorizzati] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_piombi');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            const [sessioneAttiva, setSessioneAttiva] = useState(() => {
+                const salvata = localStorage.getItem('diarioPesca_sessioneAttiva');
+                return salvata ? JSON.parse(salvata) : false;
+            });
+            const [datiSessione, setDatiSessione] = useState(() => {
+                const salvati = localStorage.getItem('diarioPesca_datiSessione');
+                return salvati ? JSON.parse(salvati) : { localita: '', latitudine: '', longitudine: '' };
+            });
+            const [coordinateGoogleMaps, setCoordinateGoogleMaps] = useState('');
+            const [sessioneCorrente, setSessioneCorrente] = useState(() => {
+                const salvata = localStorage.getItem('diarioPesca_sessioneCorrente');
+                return salvata ? JSON.parse(salvata) : null;
+            });
+            const [sessioniCompletate, setSessioniCompletate] = useState(() => {
+                const salvate = localStorage.getItem('diarioPesca_sessioniCompletate');
+                return salvate ? JSON.parse(salvate) : [];
+            });
+            
+            const [datiMeteoConfermati, setDatiMeteoConfermati] = useState(null);
+            const [mostraRegistro, setMostraRegistro] = useState(false);
+            const [messaggioErrore, setMessaggioErrore] = useState('');
+            const [nuovaCanna, setNuovaCanna] = useState('');
+            const [nuovoTrave, setNuovoTrave] = useState('');
+            const [nuovoAmo, setNuovoAmo] = useState('');
+            const [nuovoPiombo, setNuovoPiombo] = useState('');
+            const [nuovaLocalita, setNuovaLocalita] = useState('');
+            const [editandoLocalita, setEditandoLocalita] = useState(null);
+            
+            const mapRef = useRef(null);
+            
+            useEffect(() => { localStorage.setItem('diarioPesca_catture', JSON.stringify(catture)); }, [catture]);
+            useEffect(() => { localStorage.setItem('diarioPesca_specie', JSON.stringify(specieMemorizzate)); }, [specieMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_esche', JSON.stringify(escheMemorizzate)); }, [escheMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_localita', JSON.stringify(localitaMemorizzate)); }, [localitaMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_note', JSON.stringify(noteMemorizzate)); }, [noteMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_canne', JSON.stringify(canneMemorizzate)); }, [canneMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_travi', JSON.stringify(traviMemorizzate)); }, [traviMemorizzate]);
+            useEffect(() => { localStorage.setItem('diarioPesca_ami', JSON.stringify(amiMemorizzati)); }, [amiMemorizzati]);
+            useEffect(() => { localStorage.setItem('diarioPesca_piombi', JSON.stringify(piombiMemorizzati)); }, [piombiMemorizzati]);
+            useEffect(() => { localStorage.setItem('diarioPesca_sessioneAttiva', JSON.stringify(sessioneAttiva)); }, [sessioneAttiva]);
+            useEffect(() => { localStorage.setItem('diarioPesca_datiSessione', JSON.stringify(datiSessione)); }, [datiSessione]);
+            useEffect(() => { localStorage.setItem('diarioPesca_sessioneCorrente', JSON.stringify(sessioneCorrente)); }, [sessioneCorrente]);
+            useEffect(() => { localStorage.setItem('diarioPesca_sessioniCompletate', JSON.stringify(sessioniCompletate)); }, [sessioniCompletate]);
+
+            const getOraItalianaAttuale = () => new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false });
+            const getDataItalianaAttuale = () => new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+            const [nuovaCattura, setNuovaCattura] = useState({
+                data: getDataItalianaAttuale(), ora: getOraItalianaAttuale(), specie: '', peso: '', lunghezza: '', 
+                localita: '', latitudine: '', longitudine: '', esca: '', canna: '', trave: '', amo: '', piombo: '', note: ''
+            });
+
+            const [meteo, setMeteo] = useState({
+                data: getDataItalianaAttuale(), localita: '', temperatura: '', temperaturaAcqua: '', pressione: '', 
+                vento: '', direzioneVento: '', condizioni: '', faseLinare: '', altaMareaOra: '', bassaMareaOra: '',
+                altezzaOnde: '', frequenzaOnde: ''
+            });
+
+            const [filtri, setFiltri] = useState({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte' });
+
+            const ventiRosaDeiVenti = [
+                'N (Tramontana - 4°/1° Quadrante - 0°)',
+                'NNE (Tramontana-Grecale - 1° Quadrante - 22,5°)',
+                'NE (Grecale - 1° Quadrante - 45°)',
+                'ENE (Grecale-Levante - 1° Quadrante - 67,5°)',
+                'E (Levante - 1°/2° Quadrante - 90°)',
+                'ESE (Levante-Scirocco - 2° Quadrante - 112,5°)',
+                'SE (Scirocco - 2° Quadrante - 135°)',
+                'SSE (Scirocco-Ostro - 2° Quadrante - 157,5°)',
+                'S (Ostro - 2°/3° Quadrante - 180°)',
+                'SSW (Ostro-Libeccio - 3° Quadrante - 202,5°)',
+                'SW (Libeccio - 3° Quadrante - 225°)',
+                'WSW (Libeccio-Ponente - 3° Quadrante - 247,5°)',
+                'W (Ponente - 3°/4° Quadrante - 270°)',
+                'WNW (Ponente-Maestrale - 4° Quadrante - 292,5°)',
+                'NW (Maestrale - 4° Quadrante - 315°)',
+                'NNW (Maestrale-Tramontana - 4° Quadrante - 337,5°)'
+            ];
+            const fasiLunari = ['luna nuova', 'crescente', 'primo quarto', 'gibbosa crescente', 'piena', 'gibbosa calante', 'ultimo quarto', 'calante'];
+            const condizioniMeteo = ['sereno', 'nuvoloso', 'coperto', 'pioggia', 'temporale', 'nebbia'];
+
+            const avviaSessione = () => {
+                if (!datiSessione.localita || !datiSessione.latitudine || !datiSessione.longitudine) {
+                    alert('compila tutti i campi!'); return;
+                }
+                
+                // Valida coordinate
+                const validazione = validaCoordinate(datiSessione.latitudine, datiSessione.longitudine);
+                if (!validazione.valid) {
+                    alert(`⚠️ ATTENZIONE: ${validazione.error}\n\nVerifica le coordinate prima di continuare!`);
+                    return;
+                }
+                
+                if (datiSessione.localita.trim() && !localitaMemorizzate.includes(datiSessione.localita.trim())) {
+                    setLocalitaMemorizzate([...localitaMemorizzate, datiSessione.localita.trim()]);
+                }
+                
+                // Crea nuova sessione
+                const nuovaSessione = {
+                    id: Date.now(),
+                    localita: datiSessione.localita,
+                    latitudine: parseFloat(datiSessione.latitudine),
+                    longitudine: parseFloat(datiSessione.longitudine),
+                    dataInizio: getDataItalianaAttuale(),
+                    oraInizio: getOraItalianaAttuale(),
+                    dataFine: null,
+                    oraFine: null,
+                    numeroCatture: 0
+                };
+                
+                setSessioneCorrente(nuovaSessione);
+                setSessioneAttiva(true);
+                setNuovaCattura(p => ({...p, localita: datiSessione.localita, latitudine: datiSessione.latitudine, longitudine: datiSessione.longitudine}));
+                setMeteo(p => ({...p, localita: datiSessione.localita}));
+            };
+
+            const terminaSessione = () => { 
+                if (sessioneCorrente) {
+                    // Conta le catture di questa sessione
+                    const cattureQuesta = catture.filter(c => 
+                        c.localita === sessioneCorrente.localita &&
+                        c.data === sessioneCorrente.dataInizio
+                    ).length;
+                    
+                    // Completa la sessione
+                    const sessioneCompletata = {
+                        ...sessioneCorrente,
+                        dataFine: getDataItalianaAttuale(),
+                        oraFine: getOraItalianaAttuale(),
+                        numeroCatture: cattureQuesta
+                    };
+                    
+                    // Aggiungi alle sessioni completate
+                    setSessioniCompletate([...sessioniCompletate, sessioneCompletata]);
+                }
+                
+                setSessioneAttiva(false); 
+                setSessioneCorrente(null);
+                setDatiSessione({ localita: '', latitudine: '', longitudine: '' }); 
+            };
+            
+            const convertiCoordinateGoogleMaps = () => {
+                const input = coordinateGoogleMaps.trim();
+                
+                if (!input) {
+                    alert('Incolla prima le coordinate da Google Maps!');
+                    return;
+                }
+                
+                // Formato DMS: 41°24'56.2"N 12°48'02.7"E
+                const dmsRegex = /(\d+)°(\d+)'([\d.]+)"([NS])\s+(\d+)°(\d+)'([\d.]+)"([EW])/;
+                const dmsMatch = input.match(dmsRegex);
+                
+                if (dmsMatch) {
+                    const [_, latD, latM, latS, latDir, lngD, lngM, lngS, lngDir] = dmsMatch;
+                    
+                    let lat = parseFloat(latD) + parseFloat(latM)/60 + parseFloat(latS)/3600;
+                    let lng = parseFloat(lngD) + parseFloat(lngM)/60 + parseFloat(lngS)/3600;
+                    
+                    if (latDir === 'S') lat = -lat;
+                    if (lngDir === 'W') lng = -lng;
+                    
+                    setDatiSessione(p => ({
+                        ...p,
+                        latitudine: lat.toFixed(6),
+                        longitudine: lng.toFixed(6)
+                    }));
+                    
+                    alert('✅ Coordinate convertite con successo!');
+                    return;
+                }
+                
+                // Formato decimale: 41.415611, 12.800750 o 41.415611 12.800750
+                const decimalRegex = /([-\d.]+)[,\s]+([-\d.]+)/;
+                const decimalMatch = input.match(decimalRegex);
+                
+                if (decimalMatch) {
+                    setDatiSessione(p => ({
+                        ...p,
+                        latitudine: parseFloat(decimalMatch[1]).toFixed(6),
+                        longitudine: parseFloat(decimalMatch[2]).toFixed(6)
+                    }));
+                    
+                    alert('✅ Coordinate convertite con successo!');
+                    return;
+                }
+                
+                alert('❌ Formato non riconosciuto!\n\nFormati accettati:\n• 41°24\'56.2"N 12°48\'02.7"E\n• 41.415611, 12.800750\n• 41.415611 12.800750');
+            };
+            const confermaDatiMeteo = () => { setDatiMeteoConfermati({...meteo}); setMessaggioErrore(''); };
+            const applicaFiltri = () => setMostraRegistro(true);
+
+            const aggiungiCattura = () => {
+                if (!sessioneAttiva) { 
+                    setMessaggioErrore('avvia prima una sessione di pesca'); 
+                    return; 
+                }
+                if (!datiMeteoConfermati) { 
+                    setMessaggioErrore('conferma prima i dati meteo'); 
+                    return; 
+                }
+                if (!nuovaCattura.specie) { 
+                    setMessaggioErrore('inserisci la specie della cattura'); 
+                    return; 
+                }
+                setMessaggioErrore('');
+                
+                if (nuovaCattura.specie && !specieMemorizzate.includes(nuovaCattura.specie)) setSpecieMemorizzate([...specieMemorizzate, nuovaCattura.specie]);
+                if (nuovaCattura.esca && !escheMemorizzate.includes(nuovaCattura.esca)) setEscheMemorizzate([...escheMemorizzate, nuovaCattura.esca]);
+                if (nuovaCattura.localita && !localitaMemorizzate.includes(nuovaCattura.localita)) setLocalitaMemorizzate([...localitaMemorizzate, nuovaCattura.localita]);
+                if (nuovaCattura.note && !noteMemorizzate.includes(nuovaCattura.note)) setNoteMemorizzate([...noteMemorizzate, nuovaCattura.note]);
+                if (nuovaCattura.canna && !canneMemorizzate.includes(nuovaCattura.canna)) setCanneMemorizzate([...canneMemorizzate, nuovaCattura.canna]);
+                if (nuovaCattura.trave && !traviMemorizzate.includes(nuovaCattura.trave)) setTraviMemorizzate([...traviMemorizzate, nuovaCattura.trave]);
+                if (nuovaCattura.amo && !amiMemorizzati.includes(nuovaCattura.amo)) setAmiMemorizzati([...amiMemorizzati, nuovaCattura.amo]);
+                if (nuovaCattura.piombo && !piombiMemorizzati.includes(nuovaCattura.piombo)) setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
+                
+                const meteoSalvato = datiMeteoConfermati;
+                setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now()}]);
+                
+                // Mostra automaticamente il registro dopo aver salvato
+                setMostraRegistro(true);
+                setActiveSection('analisi');
+                
+                setNuovaCattura({
+                    data: getDataItalianaAttuale(), ora: getOraItalianaAttuale(), specie: '', peso: '', lunghezza: '',
+                    localita: sessioneAttiva ? datiSessione.localita : '', latitudine: sessioneAttiva ? datiSessione.latitudine : '', 
+                    longitudine: sessioneAttiva ? datiSessione.longitudine : '', esca: '', canna: '', trave: '', amo: '', piombo: '', note: ''
+                });
+                setDatiMeteoConfermati(null);
+                
+                // Messaggio di conferma
+                alert('✅ Cattura registrata con successo!');
+            };
+
+            const aggiungiCanna = () => { if (nuovaCanna.trim() && !canneMemorizzate.includes(nuovaCanna.trim())) { setCanneMemorizzate([...canneMemorizzate, nuovaCanna.trim()]); setNuovaCanna(''); }};
+            const aggiungiTrave = () => { if (nuovoTrave.trim() && !traviMemorizzate.includes(nuovoTrave.trim())) { setTraviMemorizzate([...traviMemorizzate, nuovoTrave.trim()]); setNuovoTrave(''); }};
+            const aggiungiAmo = () => { if (nuovoAmo.trim() && !amiMemorizzati.includes(nuovoAmo.trim())) { setAmiMemorizzati([...amiMemorizzati, nuovoAmo.trim()]); setNuovoAmo(''); }};
+            const aggiungiPiombo = () => { if (nuovoPiombo.trim() && !piombiMemorizzati.includes(nuovoPiombo.trim())) { setPiombiMemorizzati([...piombiMemorizzati, nuovoPiombo.trim()]); setNuovoPiombo(''); }};
+            const aggiungiLocalita = () => { if (nuovaLocalita.trim() && !localitaMemorizzate.includes(nuovaLocalita.trim())) { setLocalitaMemorizzate([...localitaMemorizzate, nuovaLocalita.trim()]); setNuovaLocalita(''); }};
+            
+            const modificaLocalita = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (localitaMemorizzate.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questa località esiste già!');
+                    return;
+                }
+                const nuoveLocalita = localitaMemorizzate.map(l => l === vecchioNome ? nuovoNomeTrim : l);
+                setLocalitaMemorizzate(nuoveLocalita);
+                setEditandoLocalita(null);
+            };
+            
+            const validaCoordinate = (lat, lng) => {
+                const latNum = parseFloat(lat);
+                const lngNum = parseFloat(lng);
+                
+                // Range Italia approssimativo: lat 35-47, long 6-19
+                if (isNaN(latNum) || isNaN(lngNum)) {
+                    return { valid: false, error: 'Coordinate non numeriche' };
+                }
+                if (latNum < 35 || latNum > 47) {
+                    return { valid: false, error: `Latitudine ${latNum} fuori range Italia (35-47)` };
+                }
+                if (lngNum < 6 || lngNum > 19) {
+                    return { valid: false, error: `Longitudine ${lngNum} fuori range Italia (6-19)` };
+                }
+                return { valid: true };
+            };
+
+            const calcolaStatistiche = () => {
+                if (catture.length === 0) return null;
+                const specieCount = {};
+                let pesoTotale = 0, numPesi = 0;
+                catture.forEach(c => {
+                    if (c.specie) specieCount[c.specie] = (specieCount[c.specie] || 0) + 1;
+                    if (c.peso) { pesoTotale += parseFloat(c.peso); numPesi++; }
+                });
+                const speciePiuCatturata = Object.entries(specieCount).length > 0 ? Object.entries(specieCount).sort((a,b) => b[1] - a[1])[0] : null;
+                const pesoMedio = numPesi > 0 ? ((pesoTotale / numPesi) / 1000).toFixed(2) : 0;
+                return { speciePiuCatturata, pesoMedio, totaleCatture: catture.length };
+            };
+
+            const getCattureFiltrate = () => catture.filter(c => {
+                const [anno, mese] = c.data.split('-');
+                return (filtri.anno === 'tutti' || anno === filtri.anno) && 
+                       (filtri.mese === 'tutti' || mese === filtri.mese) &&
+                       (filtri.specie === 'tutte' || c.specie === filtri.specie) &&
+                       (filtri.direzioneVento === 'tutte' || (c.meteo && c.meteo.direzioneVento === filtri.direzioneVento)) &&
+                       (filtri.condizioni === 'tutte' || (c.meteo && c.meteo.condizioni === filtri.condizioni)) &&
+                       (filtri.localita === 'tutte' || c.localita === filtri.localita);
+            });
+
+            const getAnniDisponibili = () => [...new Set(catture.map(c => c.data.split('-')[0]))].sort();
+
+            const esportaDati = () => {
+                if (catture.length === 0) { alert('nessuna cattura!'); return; }
+                const data = JSON.stringify({ catture, attrezzature: { canne: canneMemorizzate, travi: traviMemorizzate, ami: amiMemorizzati, piombi: piombiMemorizzati }}, null, 2);
+                const blob = new Blob([data], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `diario-pesca-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                alert('esportato!');
+            };
+
+            // Crea mappa con Leaflet - MIGLIORATO PER IPHONE E MARKER VISIBILI
+            useEffect(() => {
+                if (activeSection === 'analisi' && sessioniCompletate.length > 0) {
+                    console.log('🗺️ Tentativo creazione mappa...');
+                    console.log('📍 Sessioni completate:', sessioniCompletate.length);
+                    
+                    // Verifica che Leaflet sia caricato
+                    if (typeof L === 'undefined') {
+                        console.error('❌ Leaflet non caricato!');
+                        return;
+                    }
+                    
+                    console.log('✅ Leaflet caricato correttamente');
+                    
+                    // Delay più lungo per iPhone
+                    setTimeout(() => {
+                        const container = document.getElementById('map-container');
+                        if (!container) {
+                            console.error('❌ Container mappa non trovato!');
+                            return;
+                        }
+                        
+                        console.log('✅ Container mappa trovato');
+                        
+                        // Pulisci mappa precedente se esiste
+                        if (mapRef.current) {
+                            console.log('🧹 Rimuovo mappa precedente');
+                            mapRef.current.remove();
+                            mapRef.current = null;
+                        }
+                        
+                        try {
+                            // Filtra SOLO sessioni con coordinate VALIDE
+                            const sessioniValide = sessioniCompletate.filter(s => {
+                                const val = validaCoordinate(s.latitudine, s.longitudine);
+                                if (!val.valid) {
+                                    console.warn(`⚠️ Sessione "${s.localita}" saltata: ${val.error}`);
+                                }
+                                return val.valid;
+                            });
+                            
+                            console.log(`✅ Sessioni valide: ${sessioniValide.length} su ${sessioniCompletate.length}`);
+                            
+                            if (sessioniValide.length === 0) {
+                                console.error('❌ Nessuna sessione con coordinate valide!');
+                                container.innerHTML = '<div class="flex items-center justify-center h-full text-red-400 text-center p-4">⚠️ Nessuna sessione con coordinate valide.<br>Controlla la sezione "gestione sessioni".</div>';
+                                return;
+                            }
+                            
+                            // Crea nuova mappa
+                            console.log('🎨 Creo nuova mappa...');
+                            const map = L.map('map-container', {
+                                zoomControl: true,
+                                scrollWheelZoom: true,
+                                dragging: true,
+                                tap: true
+                            }).setView([42.0, 12.0], 6);
+                            
+                            mapRef.current = map;
+                            console.log('✅ Mappa creata');
+                            
+                            // Aggiungi tile OpenStreetMap
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© OpenStreetMap',
+                                maxZoom: 19
+                            }).addTo(map);
+                            console.log('✅ Tile aggiunte');
+                            
+                            // Definisci icona personalizzata GRANDE e COLORATA
+                            const iconaPersonalizzata = (colore, catture) => {
+                                return L.divIcon({
+                                    html: `<div style="
+                                        background-color: ${colore};
+                                        width: 30px;
+                                        height: 30px;
+                                        border-radius: 50%;
+                                        border: 3px solid white;
+                                        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-weight: bold;
+                                        color: white;
+                                        font-size: 14px;
+                                    ">${catture}</div>`,
+                                    className: '',
+                                    iconSize: [30, 30],
+                                    iconAnchor: [15, 15],
+                                    popupAnchor: [0, -15]
+                                });
+                            };
+                            
+                            // Aggiungi marker per ogni sessione VALIDA
+                            let markersAggiunti = 0;
+                            sessioniValide.forEach((sessione, index) => {
+                                console.log(`📍 Marker ${index + 1}:`, sessione.localita, sessione.latitudine, sessione.longitudine);
+                                
+                                // Colore in base al numero di catture
+                                let colore = '#ef4444'; // rosso = 0-1 catture
+                                if (sessione.numeroCatture >= 5) colore = '#22c55e'; // verde = 5+ catture
+                                else if (sessione.numeroCatture >= 2) colore = '#eab308'; // giallo = 2-4 catture
+                                
+                                const marker = L.marker(
+                                    [parseFloat(sessione.latitudine), parseFloat(sessione.longitudine)],
+                                    { icon: iconaPersonalizzata(colore, sessione.numeroCatture) }
+                                ).addTo(map);
+                                
+                                markersAggiunti++;
+                                
+                                // Popup con info sessione
+                                marker.bindPopup(`
+                                    <div style="color: black; min-width: 220px;">
+                                        <b style="font-size: 18px; color: #0891b2;">
+                                            ${sessione.localita}
+                                        </b><br><br>
+                                        📅 ${sessione.dataInizio}<br>
+                                        ⏰ ${sessione.oraInizio} - ${sessione.oraFine || 'in corso'}<br>
+                                        🎣 <b style="color: ${colore}; font-size: 20px;">${sessione.numeroCatture}</b> catture<br><br>
+                                        <small style="color: #666;">📍 ${sessione.latitudine.toFixed(4)}, ${sessione.longitudine.toFixed(4)}</small>
+                                    </div>
+                                `);
+                            });
+                            
+                            console.log(`✅ Marker aggiunti: ${markersAggiunti}`);
+                            
+                            // Centra mappa per mostrare tutti i marker
+                            if (markersAggiunti > 0) {
+                                const bounds = sessioniValide.map(s => [parseFloat(s.latitudine), parseFloat(s.longitudine)]);
+                                
+                                if (bounds.length === 1) {
+                                    // Se c'è solo un marker, centra e zoom fisso
+                                    map.setView(bounds[0], 13);
+                                } else {
+                                    map.fitBounds(bounds, { 
+                                        padding: [50, 50],
+                                        maxZoom: 15
+                                    });
+                                }
+                                console.log('✅ Mappa centrata sui marker');
+                            }
+                            
+                            // Force re-render della mappa (importante per Safari/iPhone)
+                            setTimeout(() => {
+                                map.invalidateSize();
+                                console.log('✅ Mappa ridimensionata (invalidateSize)');
+                            }, 250);
+                            
+                            console.log('🎉 Mappa completata con successo!');
+                            
+                        } catch (error) {
+                            console.error('❌ Errore creazione mappa:', error);
+                        }
+                    }, 300);
+                }
+            }, [activeSection, sessioniCompletate]);
+
+            const stats = calcolaStatistiche();
+
+            return (
+                <div className="min-h-screen bg-black p-4">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="text-center mb-8">
+                            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+                                diario di pesca
+                            </h1>
+                            <p className="text-gray-400">registra le tue battute di pesca</p>
+                            {catture.length > 0 && <p className="text-cyan-400 text-sm mt-2">{catture.length} catture salvate</p>}
+                        </div>
+
+                        <div className="mb-6 p-6 bg-gray-900 border-2 border-cyan-600 rounded-xl">
+                            <h2 className="text-2xl font-bold text-cyan-400 mb-4 text-center">sessione di pesca</h2>
+                            {!sessioneAttiva ? (
+                                <div>
+                                    <p className="text-yellow-400 text-sm mb-4 text-center">obbligatoria per registrare catture</p>
+                                    
+                                    {localitaMemorizzate.length > 0 && (
+                                        <div className="mb-4 p-3 bg-blue-900/30 border border-blue-500 rounded-lg">
+                                            <p className="text-blue-300 text-xs font-semibold mb-2">Località memorizzate ({localitaMemorizzate.length}):</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {localitaMemorizzate.map((loc, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setDatiSessione(p => ({...p, localita: loc}))}
+                                                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm active:bg-blue-700"
+                                                    >
+                                                        {loc}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <SelectField label="località" value={datiSessione.localita} onChange={(e) => setDatiSessione(p => ({...p, localita: e.target.value}))} options={localitaMemorizzate} placeholder="es: molo di ostia" />
+                                    
+                                    <div className="mb-4 p-4 bg-blue-900/20 border-2 border-blue-500 rounded-lg">
+                                        <label className="block text-blue-400 text-sm font-semibold mb-2">
+                                            📍 Incolla coordinate da Google Maps
+                                        </label>
+                                        <p className="text-gray-400 text-xs mb-3">
+                                            Formati accettati: 41°24'56.2"N 12°48'02.7"E oppure 41.415611, 12.800750
+                                        </p>
+                                        <input 
+                                            type="text" 
+                                            value={coordinateGoogleMaps} 
+                                            onChange={(e) => setCoordinateGoogleMaps(e.target.value)}
+                                            placeholder="es: 41°24'56.2&quot;N 12°48'02.7&quot;E"
+                                            className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white text-lg focus:border-blue-500 focus:outline-none mb-3"
+                                        />
+                                        <button 
+                                            onClick={convertiCoordinateGoogleMaps}
+                                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold active:bg-blue-700"
+                                        >
+                                            🔄 Converti Coordinate
+                                        </button>
+                                    </div>
+                                    
+                                    <InputField label="latitudine" type="number" value={datiSessione.latitudine} onChange={(e) => setDatiSessione(p => ({...p, latitudine: e.target.value}))} placeholder="41.415611" />
+                                    <InputField label="longitudine" type="number" value={datiSessione.longitudine} onChange={(e) => setDatiSessione(p => ({...p, longitudine: e.target.value}))} placeholder="12.800750" />
+                                    <button onClick={avviaSessione} className="w-full bg-green-600 text-white py-4 rounded-lg font-bold text-xl">avvia sessione</button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="bg-green-900/30 border-2 border-green-500 rounded-lg p-4 mb-4">
+                                        <p className="text-green-400 font-bold text-center">sessione attiva</p>
+                                        <p className="text-gray-300 text-sm text-center">{datiSessione.localita}</p>
+                                        <p className="text-gray-400 text-xs text-center">{datiSessione.latitudine}, {datiSessione.longitudine}</p>
+                                    </div>
+                                    <button onClick={terminaSessione} className="w-full bg-red-600 text-white py-3 rounded-lg font-bold">termina sessione</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <Section icon={Fish} title="aggiungi cattura" isActive={activeSection === 'cattura'} onToggle={() => setActiveSection(activeSection === 'cattura' ? null : 'cattura')}>
+                            <div className="bg-yellow-900/30 border-2 border-yellow-500 rounded-lg p-3 mb-4">
+                                <p className="text-yellow-400 text-sm font-semibold text-center">
+                                    obbligatori: sessione + meteo + specie | resto opzionale
+                                </p>
+                            </div>
+                            
+                            <InputField label="data" type="date" value={nuovaCattura.data} onChange={(e) => setNuovaCattura(p => ({...p, data: e.target.value}))} />
+                            <InputField label="ora" value={nuovaCattura.ora} onChange={(e) => setNuovaCattura(p => ({...p, ora: e.target.value}))} />
+                            <SelectField label="specie (obbligatorio)" value={nuovaCattura.specie} onChange={(e) => setNuovaCattura(p => ({...p, specie: e.target.value}))} options={specieMemorizzate} placeholder="spigola, orata..." />
+                            <InputField label="peso (g)" type="number" value={nuovaCattura.peso} onChange={(e) => setNuovaCattura(p => ({...p, peso: e.target.value}))} />
+                            <InputField label="lunghezza (cm)" type="number" value={nuovaCattura.lunghezza} onChange={(e) => setNuovaCattura(p => ({...p, lunghezza: e.target.value}))} />
+                            <SelectField label="località" value={nuovaCattura.localita} onChange={(e) => setNuovaCattura(p => ({...p, localita: e.target.value}))} options={localitaMemorizzate} placeholder="molo..." />
+                            <InputField label="latitudine" type="number" value={nuovaCattura.latitudine} onChange={(e) => setNuovaCattura(p => ({...p, latitudine: e.target.value}))} />
+                            <InputField label="longitudine" type="number" value={nuovaCattura.longitudine} onChange={(e) => setNuovaCattura(p => ({...p, longitudine: e.target.value}))} />
+                            <SelectField label="esca" value={nuovaCattura.esca} onChange={(e) => setNuovaCattura(p => ({...p, esca: e.target.value}))} options={escheMemorizzate} placeholder="verme..." />
+                            
+                            <div className="bg-gray-800 rounded-lg p-4 border-2 border-cyan-500 mb-4">
+                                <h3 className="text-cyan-400 font-bold mb-3 text-center">attrezzatura utilizzata</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <SelectField label="canna" value={nuovaCattura.canna} onChange={(e) => setNuovaCattura(p => ({...p, canna: e.target.value}))} options={canneMemorizzate} placeholder="seleziona..." />
+                                    <SelectField label="trave" value={nuovaCattura.trave} onChange={(e) => setNuovaCattura(p => ({...p, trave: e.target.value}))} options={traviMemorizzate} placeholder="seleziona..." />
+                                    <SelectField label="amo" value={nuovaCattura.amo} onChange={(e) => setNuovaCattura(p => ({...p, amo: e.target.value}))} options={amiMemorizzati} placeholder="seleziona..." />
+                                    <SelectField label="piombo" value={nuovaCattura.piombo} onChange={(e) => setNuovaCattura(p => ({...p, piombo: e.target.value}))} options={piombiMemorizzati} placeholder="seleziona..." />
+                                </div>
+                            </div>
+                            
+                            <SelectField label="note" value={nuovaCattura.note} onChange={(e) => setNuovaCattura(p => ({...p, note: e.target.value}))} options={noteMemorizzate} placeholder="note..." />
+                            
+                            <button onClick={confermaDatiMeteo} className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold">conferma dati meteo (obbligatorio)</button>
+                            {datiMeteoConfermati && <div className="mt-4 p-3 bg-green-900/30 border border-green-600 rounded-lg"><p className="text-green-400 text-sm font-semibold">dati meteo confermati</p></div>}
+                            {messaggioErrore && <div className="mt-4 p-4 bg-red-900/30 border-2 border-red-600 rounded-lg"><p className="text-red-400 font-semibold text-center">{messaggioErrore}</p></div>}
+                            <button onClick={aggiungiCattura} className="w-full mt-4 bg-cyan-600 text-white py-4 rounded-lg font-bold text-xl">registra cattura</button>
+                        </Section>
+
+                        <Section icon={Cloud} title="dati meteo" isActive={activeSection === 'meteo'} onToggle={() => setActiveSection(activeSection === 'meteo' ? null : 'meteo')}>
+                            <p className="text-yellow-400 text-sm mb-4 text-center">dati obbligatori per registrare catture</p>
+                            
+                            <InputField label="data" type="date" value={meteo.data} onChange={(e) => setMeteo(p => ({...p, data: e.target.value}))} />
+                            <SelectField label="località" value={meteo.localita} onChange={(e) => setMeteo(p => ({...p, localita: e.target.value}))} options={localitaMemorizzate} placeholder="località..." />
+                            <InputField label="temperatura (°C)" type="number" value={meteo.temperatura} onChange={(e) => setMeteo(p => ({...p, temperatura: e.target.value}))} />
+                            <InputField label="temp. acqua (°C)" type="number" value={meteo.temperaturaAcqua} onChange={(e) => setMeteo(p => ({...p, temperaturaAcqua: e.target.value}))} />
+                            <InputField label="pressione (hPa)" type="number" value={meteo.pressione} onChange={(e) => setMeteo(p => ({...p, pressione: e.target.value}))} />
+                            <InputField label="vento (nodi)" type="number" value={meteo.vento} onChange={(e) => setMeteo(p => ({...p, vento: e.target.value}))} />
+                            
+                            <div className="mb-4">
+                                <label className="block text-cyan-400 text-sm font-semibold mb-2">direzione vento</label>
+                                <select value={meteo.direzioneVento} onChange={(e) => setMeteo(p => ({...p, direzioneVento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                    <option value="">seleziona...</option>
+                                    {ventiRosaDeiVenti.map(v => <option key={v} value={v}>{v}</option>)}
+                                </select>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-cyan-400 text-sm font-semibold mb-2">condizioni</label>
+                                <select value={meteo.condizioni} onChange={(e) => setMeteo(p => ({...p, condizioni: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                    <option value="">seleziona...</option>
+                                    {condizioniMeteo.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-cyan-400 text-sm font-semibold mb-2">fase lunare</label>
+                                <select value={meteo.faseLinare} onChange={(e) => setMeteo(p => ({...p, faseLinare: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                    <option value="">seleziona...</option>
+                                    {fasiLunari.map(f => <option key={f} value={f}>{f}</option>)}
+                                </select>
+                            </div>
+                            
+                            <InputField label="alta marea" type="time" value={meteo.altaMareaOra} onChange={(e) => setMeteo(p => ({...p, altaMareaOra: e.target.value}))} />
+                            <InputField label="bassa marea" type="time" value={meteo.bassaMareaOra} onChange={(e) => setMeteo(p => ({...p, bassaMareaOra: e.target.value}))} />
+                            <InputField label="altezza onde (cm)" type="number" value={meteo.altezzaOnde} onChange={(e) => setMeteo(p => ({...p, altezzaOnde: e.target.value}))} />
+                            <InputField label="frequenza onde (sec)" type="number" value={meteo.frequenzaOnde} onChange={(e) => setMeteo(p => ({...p, frequenzaOnde: e.target.value}))} placeholder="es: 5" />
+                        </Section>
+
+                        <Section icon={Wrench} title="gestione attrezzature" isActive={activeSection === 'attrezzature'} onToggle={() => setActiveSection(activeSection === 'attrezzature' ? null : 'attrezzature')}>
+                            <div className="space-y-6">
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">località</h3>
+                                        <button onClick={aggiungiLocalita} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                    </div>
+                                    <input type="text" value={nuovaLocalita} onChange={(e) => setNuovaLocalita(e.target.value)} placeholder="es: molo di fiumicino..." 
+                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                    {localitaMemorizzate.map((l, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            {editandoLocalita === l ? (
+                                                <input 
+                                                    type="text" 
+                                                    defaultValue={l}
+                                                    onBlur={(e) => modificaLocalita(l, e.target.value)}
+                                                    onKeyPress={(e) => e.key === 'Enter' && modificaLocalita(l, e.target.value)}
+                                                    autoFocus
+                                                    className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                />
+                                            ) : (
+                                                <span className="text-gray-300 flex-1">{l}</span>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setEditandoLocalita(l)} className="text-blue-500 active:text-blue-400">
+                                                    <Edit width={16} height={16} />
+                                                </button>
+                                                <button onClick={() => setLocalitaMemorizzate(localitaMemorizzate.filter(x => x !== l))} className="text-red-500 active:text-red-400">
+                                                    <Trash2 width={16} height={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">canne</h3>
+                                        <button onClick={aggiungiCanna} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                    </div>
+                                    <input type="text" value={nuovaCanna} onChange={(e) => setNuovaCanna(e.target.value)} placeholder="es: bolognese 6m..." 
+                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                    {canneMemorizzate.map((c, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            <span className="text-gray-300">{c}</span>
+                                            <button onClick={() => setCanneMemorizzate(canneMemorizzate.filter(x => x !== c))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">travi</h3>
+                                        <button onClick={aggiungiTrave} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                    </div>
+                                    <input type="text" value={nuovoTrave} onChange={(e) => setNuovoTrave(e.target.value)} placeholder="es: 0.20mm..." 
+                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                    {traviMemorizzate.map((t, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            <span className="text-gray-300">{t}</span>
+                                            <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">ami</h3>
+                                        <button onClick={aggiungiAmo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                    </div>
+                                    <input type="text" value={nuovoAmo} onChange={(e) => setNuovoAmo(e.target.value)} placeholder="es: n.8..." 
+                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                    {amiMemorizzati.map((a, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            <span className="text-gray-300">{a}</span>
+                                            <button onClick={() => setAmiMemorizzati(amiMemorizzati.filter(x => x !== a))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">piombi</h3>
+                                        <button onClick={aggiungiPiombo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                    </div>
+                                    <input type="text" value={nuovoPiombo} onChange={(e) => setNuovoPiombo(e.target.value)} placeholder="es: 50g..." 
+                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                    {piombiMemorizzati.map((p, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            <span className="text-gray-300">{p}</span>
+                                            <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </Section>
+
+                        <Section icon={BarChart3} title="analizza dati" isActive={activeSection === 'analisi'} onToggle={() => setActiveSection(activeSection === 'analisi' ? null : 'analisi')}>
+                            {catture.length === 0 ? (
+                                <p className="text-gray-400 text-center py-8">nessuna cattura registrata</p>
+                            ) : (
+                                <>
+                                    {sessioniCompletate.length > 0 && (
+                                        <div className="mb-6">
+                                            <h3 className="text-cyan-400 font-bold text-center mb-2 text-xl">
+                                                🗺️ mappa sessioni di pesca
+                                            </h3>
+                                            <p className="text-gray-400 text-center text-sm mb-2">
+                                                {sessioniCompletate.length} {sessioniCompletate.length === 1 ? 'sessione registrata' : 'sessioni registrate'}
+                                            </p>
+                                            <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-3 mb-3 text-center">
+                                                <p className="text-blue-400 text-xs">
+                                                    💡 Apri la console del browser (F12) per vedere i dettagli del caricamento
+                                                </p>
+                                            </div>
+                                            <div 
+                                                id="map-container" 
+                                                className="w-full h-96 rounded-lg border-2 border-cyan-500"
+                                                style={{minHeight: '400px'}}
+                                            ></div>
+                                        </div>
+                                    )}
+                                    
+                                    {sessioniCompletate.length > 0 && (
+                                        <div className="mb-6 bg-gray-800 rounded-lg p-4 border-2 border-orange-500">
+                                            <h3 className="text-orange-400 font-bold mb-4 text-center text-xl">
+                                                📋 gestione sessioni registrate
+                                            </h3>
+                                            <p className="text-gray-400 text-sm mb-4 text-center">
+                                                Cancella sessioni con coordinate errate
+                                            </p>
+                                            <div className="space-y-2">
+                                                {sessioniCompletate.map((sessione) => {
+                                                    const validazione = validaCoordinate(sessione.latitudine, sessione.longitudine);
+                                                    return (
+                                                        <div 
+                                                            key={sessione.id} 
+                                                            className={`flex justify-between items-center p-3 rounded-lg ${validazione.valid ? 'bg-gray-900 border border-gray-700' : 'bg-red-900/30 border-2 border-red-500'}`}
+                                                        >
+                                                            <div className="flex-1">
+                                                                <p className="text-white font-semibold">{sessione.localita}</p>
+                                                                <p className="text-gray-400 text-sm">
+                                                                    📅 {sessione.dataInizio} • ⏰ {sessione.oraInizio}-{sessione.oraFine} • 🎣 {sessione.numeroCatture} catture
+                                                                </p>
+                                                                <p className={`text-xs mt-1 ${validazione.valid ? 'text-green-400' : 'text-red-400'}`}>
+                                                                    📍 Lat: {sessione.latitudine}, Long: {sessione.longitudine}
+                                                                    {!validazione.valid && <span className="ml-2">⚠️ {validazione.error}</span>}
+                                                                </p>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    if (window.confirm(`Cancellare la sessione "${sessione.localita}" del ${sessione.dataInizio}?`)) {
+                                                                        setSessioniCompletate(sessioniCompletate.filter(s => s.id !== sessione.id));
+                                                                    }
+                                                                }}
+                                                                className="text-red-500 active:text-red-400 ml-3"
+                                                            >
+                                                                <Trash2 width={20} height={20} />
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="bg-gray-800 rounded-lg p-4 border-2 border-purple-500 mb-6">
+                                        <h3 className="text-purple-400 font-bold mb-4 text-center">filtri ricerca</h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">anno</label>
+                                                <select value={filtri.anno} onChange={(e) => setFiltri(p => ({...p, anno: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutti gli anni</option>
+                                                    {getAnniDisponibili().map(a => <option key={a} value={a}>{a}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">mese</label>
+                                                <select value={filtri.mese} onChange={(e) => setFiltri(p => ({...p, mese: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutti i mesi</option>
+                                                    <option value="01">gennaio</option>
+                                                    <option value="02">febbraio</option>
+                                                    <option value="03">marzo</option>
+                                                    <option value="04">aprile</option>
+                                                    <option value="05">maggio</option>
+                                                    <option value="06">giugno</option>
+                                                    <option value="07">luglio</option>
+                                                    <option value="08">agosto</option>
+                                                    <option value="09">settembre</option>
+                                                    <option value="10">ottobre</option>
+                                                    <option value="11">novembre</option>
+                                                    <option value="12">dicembre</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">specie</label>
+                                                <select value={filtri.specie} onChange={(e) => setFiltri(p => ({...p, specie: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le specie</option>
+                                                    {[...new Set(catture.map(c => c.specie).filter(Boolean))].sort().map(s => <option key={s} value={s}>{s}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">località</label>
+                                                <select value={filtri.localita} onChange={(e) => setFiltri(p => ({...p, localita: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le località</option>
+                                                    {[...new Set(catture.map(c => c.localita).filter(Boolean))].sort().map(l => <option key={l} value={l}>{l}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">direzione vento</label>
+                                                <select value={filtri.direzioneVento} onChange={(e) => setFiltri(p => ({...p, direzioneVento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le direzioni</option>
+                                                    {ventiRosaDeiVenti.map(v => <option key={v} value={v}>{v}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">condizioni meteo</label>
+                                                <select value={filtri.condizioni} onChange={(e) => setFiltri(p => ({...p, condizioni: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le condizioni</option>
+                                                    {condizioniMeteo.map(c => <option key={c} value={c}>{c}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={() => setFiltri({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte' })}
+                                            className="w-full mt-4 bg-red-600 text-white py-2 rounded-lg font-bold">
+                                            reset filtri
+                                        </button>
+                                    </div>
+
+                                    <button onClick={applicaFiltri} className="w-full mb-6 bg-purple-600 text-white py-3 rounded-lg font-bold">mostra registro</button>
+                                    
+                                    {stats && (
+                                        <div className="grid grid-cols-3 gap-4 mb-6">
+                                            <div className="bg-cyan-900 rounded-lg p-4 border border-cyan-600">
+                                                <p className="text-cyan-300 text-xs font-semibold">totale</p>
+                                                <p className="text-white text-2xl font-bold">{stats.totaleCatture}</p>
+                                            </div>
+                                            <div className="bg-blue-900 rounded-lg p-4 border border-blue-600">
+                                                <p className="text-blue-300 text-xs font-semibold">più catturata</p>
+                                                {stats.speciePiuCatturata && (
+                                                    <>
+                                                        <p className="text-white text-lg font-bold">{stats.speciePiuCatturata[0]}</p>
+                                                        <p className="text-blue-300 text-xs">({stats.speciePiuCatturata[1]})</p>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="bg-green-900 rounded-lg p-4 border border-green-600">
+                                                <p className="text-green-300 text-xs font-semibold">peso medio</p>
+                                                <p className="text-white text-2xl font-bold">{stats.pesoMedio} kg</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {mostraRegistro && (
+                                        <div className="space-y-4">
+                                            <h3 className="text-xl font-bold text-cyan-400 mb-4">registro ({getCattureFiltrate().length} catture)</h3>
+                                            {getCattureFiltrate().map(c => (
+                                                <div key={c.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                                                    <div className="flex justify-between mb-2">
+                                                        <div>
+                                                            <h4 className="text-white font-bold text-xl">{c.specie}</h4>
+                                                            <p className="text-gray-400 text-sm">{c.data} - {c.ora}</p>
+                                                        </div>
+                                                        <button onClick={() => setCatture(catture.filter(x => x.id !== c.id))} className="text-red-500"><Trash2 width={20} height={20} /></button>
+                                                    </div>
+                                                    
+                                                    <div className="mb-3">
+                                                        <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati cattura</h5>
+                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                            {c.peso && <p className="text-gray-300"><span className="text-cyan-400">peso:</span> {(parseFloat(c.peso)/1000).toFixed(2)} kg</p>}
+                                                            {c.lunghezza && <p className="text-gray-300"><span className="text-cyan-400">lunghezza:</span> {c.lunghezza} cm</p>}
+                                                            {c.localita && <p className="text-gray-300"><span className="text-cyan-400">località:</span> {c.localita}</p>}
+                                                            {c.esca && <p className="text-gray-300"><span className="text-cyan-400">esca:</span> {c.esca}</p>}
+                                                            {c.latitudine && <p className="text-gray-300"><span className="text-cyan-400">lat:</span> {c.latitudine}</p>}
+                                                            {c.longitudine && <p className="text-gray-300"><span className="text-cyan-400">long:</span> {c.longitudine}</p>}
+                                                            {c.canna && <p className="text-gray-300"><span className="text-cyan-400">canna:</span> {c.canna}</p>}
+                                                            {c.trave && <p className="text-gray-300"><span className="text-cyan-400">trave:</span> {c.trave}</p>}
+                                                            {c.amo && <p className="text-gray-300"><span className="text-cyan-400">amo:</span> {c.amo}</p>}
+                                                            {c.piombo && <p className="text-gray-300"><span className="text-cyan-400">piombo:</span> {c.piombo}</p>}
+                                                        </div>
+                                                        {c.note && <p className="text-gray-400 text-sm mt-2 italic"><span className="text-cyan-400">note:</span> {c.note}</p>}
+                                                    </div>
+
+                                                    {c.meteo && Object.values(c.meteo).some(Boolean) && (
+                                                        <div>
+                                                            <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati meteo</h5>
+                                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                {c.meteo.temperatura && <p className="text-gray-300"><span className="text-cyan-400">temp aria:</span> {c.meteo.temperatura}°C</p>}
+                                                                {c.meteo.temperaturaAcqua && <p className="text-gray-300"><span className="text-cyan-400">temp acqua:</span> {c.meteo.temperaturaAcqua}°C</p>}
+                                                                {c.meteo.pressione && <p className="text-gray-300"><span className="text-cyan-400">pressione:</span> {c.meteo.pressione} hPa</p>}
+                                                                {c.meteo.vento && <p className="text-gray-300"><span className="text-cyan-400">vento:</span> {c.meteo.vento} nodi</p>}
+                                                                {c.meteo.direzioneVento && <p className="text-gray-300 col-span-2"><span className="text-cyan-400">direzione:</span> {c.meteo.direzioneVento}</p>}
+                                                                {c.meteo.condizioni && <p className="text-gray-300"><span className="text-cyan-400">condizioni:</span> {c.meteo.condizioni}</p>}
+                                                                {c.meteo.faseLinare && <p className="text-gray-300"><span className="text-cyan-400">luna:</span> {c.meteo.faseLinare}</p>}
+                                                                {c.meteo.altaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">alta marea:</span> {c.meteo.altaMareaOra}</p>}
+                                                                {c.meteo.bassaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">bassa marea:</span> {c.meteo.bassaMareaOra}</p>}
+                                                                {c.meteo.altezzaOnde && <p className="text-gray-300"><span className="text-cyan-400">altezza onde:</span> {c.meteo.altezzaOnde} cm</p>}
+                                                                {c.meteo.frequenzaOnde && <p className="text-gray-300"><span className="text-cyan-400">frequenza onde:</span> {c.meteo.frequenzaOnde} sec</p>}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </Section>
+
+                        {catture.length > 0 && (
+                            <div className="mt-8 p-6 bg-gray-900 border-2 border-purple-600 rounded-xl">
+                                <h2 className="text-2xl font-bold text-purple-400 mb-3 text-center">esportazione</h2>
+                                <button onClick={esportaDati} className="w-full bg-purple-600 text-white py-4 rounded-lg font-bold text-xl">
+                                    esporta dati ({catture.length})
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<DiarioPesca />);
+    </script>
+</body>
+</html>
