@@ -113,7 +113,6 @@
                 const salvati = localStorage.getItem('diarioPesca_datiSessione');
                 return salvati ? JSON.parse(salvati) : { localita: '', latitudine: '', longitudine: '' };
             });
-            const [coordinateGoogleMaps, setCoordinateGoogleMaps] = useState('');
             const [sessioneCorrente, setSessioneCorrente] = useState(() => {
                 const salvata = localStorage.getItem('diarioPesca_sessioneCorrente');
                 return salvata ? JSON.parse(salvata) : null;
@@ -246,53 +245,52 @@
                 setDatiSessione({ localita: '', latitudine: '', longitudine: '' }); 
             };
             
-            const convertiCoordinateGoogleMaps = () => {
-                const input = coordinateGoogleMaps.trim();
-                
-                if (!input) {
-                    alert('Incolla prima le coordinate da Google Maps!');
+            const ottieniPosizioneGPS = () => {
+                if (!navigator.geolocation) {
+                    alert('❌ Geolocalizzazione non supportata dal tuo browser!');
                     return;
                 }
-                
-                // Formato DMS: 41°24'56.2"N 12°48'02.7"E
-                const dmsRegex = /(\d+)°(\d+)'([\d.]+)"([NS])\s+(\d+)°(\d+)'([\d.]+)"([EW])/;
-                const dmsMatch = input.match(dmsRegex);
-                
-                if (dmsMatch) {
-                    const [_, latD, latM, latS, latDir, lngD, lngM, lngS, lngDir] = dmsMatch;
-                    
-                    let lat = parseFloat(latD) + parseFloat(latM)/60 + parseFloat(latS)/3600;
-                    let lng = parseFloat(lngD) + parseFloat(lngM)/60 + parseFloat(lngS)/3600;
-                    
-                    if (latDir === 'S') lat = -lat;
-                    if (lngDir === 'W') lng = -lng;
-                    
-                    setDatiSessione(p => ({
-                        ...p,
-                        latitudine: lat.toFixed(6),
-                        longitudine: lng.toFixed(6)
-                    }));
-                    
-                    alert('✅ Coordinate convertite con successo!');
-                    return;
-                }
-                
-                // Formato decimale: 41.415611, 12.800750 o 41.415611 12.800750
-                const decimalRegex = /([-\d.]+)[,\s]+([-\d.]+)/;
-                const decimalMatch = input.match(decimalRegex);
-                
-                if (decimalMatch) {
-                    setDatiSessione(p => ({
-                        ...p,
-                        latitudine: parseFloat(decimalMatch[1]).toFixed(6),
-                        longitudine: parseFloat(decimalMatch[2]).toFixed(6)
-                    }));
-                    
-                    alert('✅ Coordinate convertite con successo!');
-                    return;
-                }
-                
-                alert('❌ Formato non riconosciuto!\n\nFormati accettati:\n• 41°24\'56.2"N 12°48\'02.7"E\n• 41.415611, 12.800750\n• 41.415611 12.800750');
+
+                alert('📍 Richiesta posizione GPS in corso...');
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        setDatiSessione(p => ({
+                            ...p,
+                            latitudine: lat.toFixed(6),
+                            longitudine: lng.toFixed(6)
+                        }));
+
+                        alert(`✅ Posizione GPS acquisita con successo!\n\nPrecisione: ±${Math.round(position.coords.accuracy)}m`);
+                    },
+                    (error) => {
+                        let messaggioErrore = '❌ Impossibile ottenere la posizione GPS!\n\n';
+
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                messaggioErrore += 'Hai negato l\'accesso alla posizione. Abilita i permessi nelle impostazioni del browser.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                messaggioErrore += 'Posizione non disponibile. Verifica di essere all\'aperto con GPS attivo.';
+                                break;
+                            case error.TIMEOUT:
+                                messaggioErrore += 'Timeout nella richiesta GPS. Riprova.';
+                                break;
+                            default:
+                                messaggioErrore += 'Errore sconosciuto.';
+                        }
+
+                        alert(messaggioErrore);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
             };
             const confermaDatiMeteo = () => { setDatiMeteoConfermati({...meteo}); setMessaggioErrore(''); };
             const applicaFiltri = () => setMostraRegistro(true);
@@ -607,29 +605,22 @@
                                     )}
                                     
                                     <SelectField label="località" value={datiSessione.localita} onChange={(e) => setDatiSessione(p => ({...p, localita: e.target.value}))} options={localitaMemorizzate} placeholder="es: molo di ostia" />
-                                    
-                                    <div className="mb-4 p-4 bg-blue-900/20 border-2 border-blue-500 rounded-lg">
-                                        <label className="block text-blue-400 text-sm font-semibold mb-2">
-                                            📍 Incolla coordinate da Google Maps
+
+                                    <div className="mb-4 p-4 bg-green-900/20 border-2 border-green-500 rounded-lg">
+                                        <label className="block text-green-400 text-sm font-semibold mb-2">
+                                            📍 Ottieni Posizione GPS
                                         </label>
                                         <p className="text-gray-400 text-xs mb-3">
-                                            Formati accettati: 41°24'56.2"N 12°48'02.7"E oppure 41.415611, 12.800750
+                                            Premi il pulsante per acquisire automaticamente le coordinate dalla tua posizione attuale
                                         </p>
-                                        <input 
-                                            type="text" 
-                                            value={coordinateGoogleMaps} 
-                                            onChange={(e) => setCoordinateGoogleMaps(e.target.value)}
-                                            placeholder="es: 41°24'56.2&quot;N 12°48'02.7&quot;E"
-                                            className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white text-lg focus:border-blue-500 focus:outline-none mb-3"
-                                        />
-                                        <button 
-                                            onClick={convertiCoordinateGoogleMaps}
-                                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold active:bg-blue-700"
+                                        <button
+                                            onClick={ottieniPosizioneGPS}
+                                            className="w-full bg-green-600 text-white py-3 rounded-lg font-bold active:bg-green-700 flex items-center justify-center gap-2"
                                         >
-                                            🔄 Converti Coordinate
+                                            <span style={{fontSize: '24px'}}>📡</span> Usa GPS Dispositivo
                                         </button>
                                     </div>
-                                    
+
                                     <InputField label="latitudine" type="number" value={datiSessione.latitudine} onChange={(e) => setDatiSessione(p => ({...p, latitudine: e.target.value}))} placeholder="41.415611" />
                                     <InputField label="longitudine" type="number" value={datiSessione.longitudine} onChange={(e) => setDatiSessione(p => ({...p, longitudine: e.target.value}))} placeholder="12.800750" />
                                     <button onClick={avviaSessione} className="w-full bg-green-600 text-white py-4 rounded-lg font-bold text-xl">avvia sessione</button>
