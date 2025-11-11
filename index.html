@@ -294,19 +294,24 @@
                 setMeteo(p => ({...p, localita: datiSessione.localita}));
             };
 
-            const terminaSessione = () => { 
+            const terminaSessione = () => {
                 if (sessioneCorrente) {
-                    // Conta le catture di questa sessione
-                    const cattureQuesta = catture.filter(c => 
+                    // Ottieni ora fine PRIMA di contare le catture
+                    const oraFine = getOraItalianaAttuale();
+
+                    // Conta SOLO le catture di questa sessione specifica (località, data E range orario)
+                    const cattureQuesta = catture.filter(c =>
                         c.localita === sessioneCorrente.localita &&
-                        c.data === sessioneCorrente.dataInizio
+                        c.data === sessioneCorrente.dataInizio &&
+                        c.ora >= sessioneCorrente.oraInizio &&
+                        c.ora <= oraFine
                     ).length;
-                    
+
                     // Completa la sessione
                     const sessioneCompletata = {
                         ...sessioneCorrente,
                         dataFine: getDataItalianaAttuale(),
-                        oraFine: getOraItalianaAttuale(),
+                        oraFine: oraFine,
                         numeroCatture: cattureQuesta
                     };
                     
