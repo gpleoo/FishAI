@@ -296,22 +296,14 @@
 
             const terminaSessione = () => {
                 if (sessioneCorrente) {
-                    // Ottieni ora fine PRIMA di contare le catture
-                    const oraFine = getOraItalianaAttuale();
-
-                    // Conta SOLO le catture di questa sessione specifica (località, data E range orario)
-                    const cattureQuesta = catture.filter(c =>
-                        c.localita === sessioneCorrente.localita &&
-                        c.data === sessioneCorrente.dataInizio &&
-                        c.ora >= sessioneCorrente.oraInizio &&
-                        c.ora <= oraFine
-                    ).length;
+                    // Conta SOLO le catture con l'ID di questa sessione specifica
+                    const cattureQuesta = catture.filter(c => c.sessioneId === sessioneCorrente.id).length;
 
                     // Completa la sessione
                     const sessioneCompletata = {
                         ...sessioneCorrente,
                         dataFine: getDataItalianaAttuale(),
-                        oraFine: oraFine,
+                        oraFine: getOraItalianaAttuale(),
                         numeroCatture: cattureQuesta
                     };
                     
@@ -409,7 +401,7 @@
                 if (nuovaCattura.piombo && !piombiMemorizzati.includes(nuovaCattura.piombo)) setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
                 
                 const meteoSalvato = datiMeteoConfermati;
-                setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now()}]);
+                setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
                 
                 // Mostra automaticamente il registro dopo aver salvato
                 setMostraRegistro(true);
