@@ -6,7 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>diario di pesca</title>
-    
+    <link rel="icon" type="image/png" href="https://drive.google.com/uc?export=view&id=1OO4_iENXcIoJ8dJx8qCApZjf3zLIrH67">
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -197,6 +198,10 @@
             const [nuovaLocalita, setNuovaLocalita] = useState('');
             const [editandoLocalita, setEditandoLocalita] = useState(null);
             const [valoreEditLocalita, setValoreEditLocalita] = useState('');
+            const [editandoSpecie, setEditandoSpecie] = useState(null);
+            const [valoreEditSpecie, setValoreEditSpecie] = useState('');
+            const [editandoEsca, setEditandoEsca] = useState(null);
+            const [valoreEditEsca, setValoreEditEsca] = useState('');
             
             const mapRef = useRef(null);
             
@@ -437,6 +442,36 @@
                 const nuoveLocalita = localitaMemorizzate.map(l => l === vecchioNome ? nuovoNomeTrim : l);
                 setLocalitaMemorizzate(nuoveLocalita);
                 setEditandoLocalita(null);
+            };
+
+            const modificaSpecie = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (specieMemorizzate.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questa specie esiste già!');
+                    return;
+                }
+                const nuoveSpecie = specieMemorizzate.map(s => s === vecchioNome ? nuovoNomeTrim : s);
+                setSpecieMemorizzate(nuoveSpecie);
+                setEditandoSpecie(null);
+            };
+
+            const modificaEsca = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (escheMemorizzate.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questa esca esiste già!');
+                    return;
+                }
+                const nuoveEsche = escheMemorizzate.map(e => e === vecchioNome ? nuovoNomeTrim : e);
+                setEscheMemorizzate(nuoveEsche);
+                setEditandoEsca(null);
             };
             
             const validaCoordinate = (lat, lng) => {
@@ -702,9 +737,12 @@
                 <div className="min-h-screen bg-black p-4">
                     <div className="max-w-4xl mx-auto">
                         <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
-                                diario di pesca
-                            </h1>
+                            <img
+                                src="https://drive.google.com/uc?export=view&id=1OO4_iENXcIoJ8dJx8qCApZjf3zLIrH67"
+                                alt="FishAI Logo"
+                                className="mx-auto mb-4"
+                                style={{maxWidth: '300px', width: '100%', height: 'auto'}}
+                            />
                             <p className="text-gray-400">registra le tue battute di pesca</p>
                             {catture.length > 0 && <p className="text-cyan-400 text-sm mt-2">{catture.length} catture salvate</p>}
                         </div>
@@ -840,7 +878,7 @@
                             <InputField label="frequenza onde (sec)" type="number" value={meteo.frequenzaOnde} onChange={(e) => setMeteo(p => ({...p, frequenzaOnde: e.target.value}))} placeholder="es: 5" min="0" step="0.1" />
                         </Section>
 
-                        <Section icon={Wrench} title="gestione attrezzature" isActive={activeSection === 'attrezzature'} onToggle={() => setActiveSection(activeSection === 'attrezzature' ? null : 'attrezzature')}>
+                        <Section icon={Wrench} title="gestione" isActive={activeSection === 'attrezzature'} onToggle={() => setActiveSection(activeSection === 'attrezzature' ? null : 'attrezzature')}>
                             <div className="space-y-6">
                                 <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
                                     <div className="flex justify-between items-center mb-3">
@@ -869,6 +907,68 @@
                                                     <Edit width={16} height={16} />
                                                 </button>
                                                 <button onClick={() => setLocalitaMemorizzate(localitaMemorizzate.filter(x => x !== l))} className="text-red-500 active:text-red-400">
+                                                    <Trash2 width={16} height={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">specie</h3>
+                                    </div>
+                                    {specieMemorizzate.map((s, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            {editandoSpecie === s ? (
+                                                <input
+                                                    type="text"
+                                                    value={valoreEditSpecie}
+                                                    onChange={(e) => setValoreEditSpecie(e.target.value)}
+                                                    onBlur={() => { modificaSpecie(s, valoreEditSpecie); setEditandoSpecie(null); }}
+                                                    onKeyPress={(e) => { if (e.key === 'Enter') { modificaSpecie(s, valoreEditSpecie); setEditandoSpecie(null); }}}
+                                                    autoFocus
+                                                    className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                />
+                                            ) : (
+                                                <span className="text-gray-300 flex-1">{s}</span>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => { setEditandoSpecie(s); setValoreEditSpecie(s); }} className="text-blue-500 active:text-blue-400">
+                                                    <Edit width={16} height={16} />
+                                                </button>
+                                                <button onClick={() => setSpecieMemorizzate(specieMemorizzate.filter(x => x !== s))} className="text-red-500 active:text-red-400">
+                                                    <Trash2 width={16} height={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-lg font-bold text-cyan-400">esche</h3>
+                                    </div>
+                                    {escheMemorizzate.map((e, i) => (
+                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                            {editandoEsca === e ? (
+                                                <input
+                                                    type="text"
+                                                    value={valoreEditEsca}
+                                                    onChange={(ev) => setValoreEditEsca(ev.target.value)}
+                                                    onBlur={() => { modificaEsca(e, valoreEditEsca); setEditandoEsca(null); }}
+                                                    onKeyPress={(ev) => { if (ev.key === 'Enter') { modificaEsca(e, valoreEditEsca); setEditandoEsca(null); }}}
+                                                    autoFocus
+                                                    className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                />
+                                            ) : (
+                                                <span className="text-gray-300 flex-1">{e}</span>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => { setEditandoEsca(e); setValoreEditEsca(e); }} className="text-blue-500 active:text-blue-400">
+                                                    <Edit width={16} height={16} />
+                                                </button>
+                                                <button onClick={() => setEscheMemorizzate(escheMemorizzate.filter(x => x !== e))} className="text-red-500 active:text-red-400">
                                                     <Trash2 width={16} height={16} />
                                                 </button>
                                             </div>
