@@ -606,35 +606,64 @@
                                 });
                             };
                             
-                            // Aggiungi marker per ogni sessione VALIDA
+                            // RAGGRUPPA SESSIONI PER COORDINATE (per gestire sovrapposizioni)
+                            const gruppiCoordinate = {};
+                            sessioniValide.forEach(sessione => {
+                                const chiave = `${sessione.latitudine},${sessione.longitudine}`;
+                                if (!gruppiCoordinate[chiave]) {
+                                    gruppiCoordinate[chiave] = [];
+                                }
+                                gruppiCoordinate[chiave].push(sessione);
+                            });
+
+                            console.log(`🗺️ Gruppi di coordinate: ${Object.keys(gruppiCoordinate).length}`);
+
+                            // Aggiungi marker per ogni sessione VALIDA con offset se necessario
                             let markersAggiunti = 0;
-                            sessioniValide.forEach((sessione, index) => {
-                                console.log(`📍 Marker ${index + 1}:`, sessione.localita, sessione.latitudine, sessione.longitudine);
-                                
-                                // Colore in base al numero di catture
-                                let colore = '#ef4444'; // rosso = 0-1 catture
-                                if (sessione.numeroCatture >= 5) colore = '#22c55e'; // verde = 5+ catture
-                                else if (sessione.numeroCatture >= 2) colore = '#eab308'; // giallo = 2-4 catture
-                                
-                                const marker = L.marker(
-                                    [parseFloat(sessione.latitudine), parseFloat(sessione.longitudine)],
-                                    { icon: iconaPersonalizzata(colore, sessione.numeroCatture) }
-                                ).addTo(map);
-                                
-                                markersAggiunti++;
-                                
-                                // Popup con info sessione
-                                marker.bindPopup(`
-                                    <div style="color: black; min-width: 220px;">
-                                        <b style="font-size: 18px; color: #0891b2;">
-                                            ${sessione.localita}
-                                        </b><br><br>
-                                        📅 ${sessione.dataInizio}<br>
-                                        ⏰ ${sessione.oraInizio} - ${sessione.oraFine || 'in corso'}<br>
-                                        🎣 <b style="color: ${colore}; font-size: 20px;">${sessione.numeroCatture}</b> catture<br><br>
-                                        <small style="color: #666;">📍 ${sessione.latitudine.toFixed(4)}, ${sessione.longitudine.toFixed(4)}</small>
-                                    </div>
-                                `);
+                            Object.values(gruppiCoordinate).forEach(gruppo => {
+                                const offsetRadialeGradi = 0.0008; // ~90 metri di offset
+
+                                gruppo.forEach((sessione, indexGruppo) => {
+                                    const lat = parseFloat(sessione.latitudine);
+                                    const lng = parseFloat(sessione.longitudine);
+
+                                    // Calcola offset se ci sono più sessioni nella stessa posizione
+                                    let latConOffset = lat;
+                                    let lngConOffset = lng;
+
+                                    if (gruppo.length > 1) {
+                                        // Distribuisci i marker in cerchio attorno alla posizione originale
+                                        const angolo = (2 * Math.PI * indexGruppo) / gruppo.length;
+                                        latConOffset = lat + (offsetRadialeGradi * Math.cos(angolo));
+                                        lngConOffset = lng + (offsetRadialeGradi * Math.sin(angolo));
+                                        console.log(`📍 Marker con offset: ${sessione.localita} (${indexGruppo + 1}/${gruppo.length})`);
+                                    }
+
+                                    // Colore in base al numero di catture
+                                    let colore = '#ef4444'; // rosso = 0-1 catture
+                                    if (sessione.numeroCatture >= 5) colore = '#22c55e'; // verde = 5+ catture
+                                    else if (sessione.numeroCatture >= 2) colore = '#eab308'; // giallo = 2-4 catture
+
+                                    const marker = L.marker(
+                                        [latConOffset, lngConOffset],
+                                        { icon: iconaPersonalizzata(colore, sessione.numeroCatture) }
+                                    ).addTo(map);
+
+                                    markersAggiunti++;
+
+                                    // Popup con info sessione (mostra coordinate ORIGINALI)
+                                    marker.bindPopup(`
+                                        <div style="color: black; min-width: 220px;">
+                                            <b style="font-size: 18px; color: #0891b2;">
+                                                ${sessione.localita}
+                                            </b><br><br>
+                                            📅 ${sessione.dataInizio}<br>
+                                            ⏰ ${sessione.oraInizio} - ${sessione.oraFine || 'in corso'}<br>
+                                            🎣 <b style="color: ${colore}; font-size: 20px;">${sessione.numeroCatture}</b> catture<br><br>
+                                            <small style="color: #666;">📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}</small>
+                                        </div>
+                                    `);
+                                });
                             });
                             
                             console.log(`✅ Marker aggiunti: ${markersAggiunti}`);
