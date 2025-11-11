@@ -6,7 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>diario di pesca</title>
-    
+    <link rel="icon" type="image/png" href="https://drive.google.com/uc?export=view&id=1OO4_iENXcIoJ8dJx8qCApZjf3zLIrH67">
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -736,9 +737,12 @@
                 <div className="min-h-screen bg-black p-4">
                     <div className="max-w-4xl mx-auto">
                         <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
-                                diario di pesca
-                            </h1>
+                            <img
+                                src="https://drive.google.com/uc?export=view&id=1OO4_iENXcIoJ8dJx8qCApZjf3zLIrH67"
+                                alt="FishAI Logo"
+                                className="mx-auto mb-4"
+                                style={{maxWidth: '300px', width: '100%', height: 'auto'}}
+                            />
                             <p className="text-gray-400">registra le tue battute di pesca</p>
                             {catture.length > 0 && <p className="text-cyan-400 text-sm mt-2">{catture.length} catture salvate</p>}
                         </div>
