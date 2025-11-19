@@ -636,28 +636,46 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 try {
                     switch (stato) {
                         case 'SPECIE':
-                            await parla('Specie?');
-                            const rispostaSpecie = await ascolta();
+                            let specieTrovata = null;
 
-                            if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
-                                // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
-                                console.log('🎤 Risposta riconosciuta:', rispostaSpecie);
-                                console.log('📋 Specie disponibili:', specieMemorizzate);
-
-                                // Validazione: controlla se la specie esiste in lista (case-insensitive)
-                                const specieTrovata = specieMemorizzate.find(s =>
-                                    s.toLowerCase() === rispostaSpecie.toLowerCase()
-                                );
-
-                                if (specieTrovata) {
-                                    setNuovaCattura(prev => ({ ...prev, specie: specieTrovata }));
-                                    datiCatturaVocaleRef.current.specie = specieTrovata;
-                                    console.log('✅ Specie compilata:', specieTrovata);
-                                    await parla(`Specie registrata: ${specieTrovata}`);
+                            for (let tentativo = 1; tentativo <= 3; tentativo++) {
+                                // Prima domanda o ripetizione
+                                if (tentativo === 1) {
+                                    await parla('Specie?');
                                 } else {
-                                    console.log('⚠️ Specie non trovata in lista:', rispostaSpecie);
-                                    console.log('💡 Specie disponibili:', specieMemorizzate.join(', '));
-                                    await parla(`Specie non riconosciuta. Ho sentito: ${rispostaSpecie}. Aggiungila manualmente.`);
+                                    await parla('Non ho capito bene. Ripeti la specie?');
+                                }
+
+                                const rispostaSpecie = await ascolta();
+
+                                if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
+                                    // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
+                                    console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaSpecie);
+                                    console.log('📋 Specie disponibili:', specieMemorizzate);
+
+                                    // Validazione: controlla se la specie esiste in lista (case-insensitive)
+                                    specieTrovata = specieMemorizzate.find(s =>
+                                        s.toLowerCase() === rispostaSpecie.toLowerCase()
+                                    );
+
+                                    if (specieTrovata) {
+                                        // Specie trovata! Compila e esci dal loop
+                                        setNuovaCattura(prev => ({ ...prev, specie: specieTrovata }));
+                                        datiCatturaVocaleRef.current.specie = specieTrovata;
+                                        console.log('✅ Specie compilata:', specieTrovata);
+                                        await parla(`Specie registrata: ${specieTrovata}`);
+                                        break; // Esci dal loop
+                                    } else {
+                                        // Specie non trovata
+                                        console.log(`⚠️ Tentativo ${tentativo} - Specie non trovata:`, rispostaSpecie);
+
+                                        if (tentativo === 3) {
+                                            // Ultimo tentativo fallito
+                                            console.log('❌ Specie non riconosciuta dopo 3 tentativi');
+                                            await parla('Specie non riconosciuta dopo tre tentativi. Aggiungila manualmente.');
+                                        }
+                                        // Se tentativo < 3, il loop continua e chiederà "Ripeti la specie?"
+                                    }
                                 }
                             }
 
@@ -683,28 +701,46 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             break;
 
                         case 'ESCA':
-                            await parla('Esca?');
-                            const rispostaEsca = await ascolta();
+                            let escaTrovata = null;
 
-                            if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
-                                // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
-                                console.log('🎤 Risposta riconosciuta:', rispostaEsca);
-                                console.log('📋 Esche disponibili:', escheMemorizzate);
-
-                                // Validazione: controlla se l'esca esiste in lista (case-insensitive)
-                                const escaTrovata = escheMemorizzate.find(e =>
-                                    e.toLowerCase() === rispostaEsca.toLowerCase()
-                                );
-
-                                if (escaTrovata) {
-                                    setNuovaCattura(prev => ({ ...prev, esca: escaTrovata }));
-                                    datiCatturaVocaleRef.current.esca = escaTrovata;
-                                    console.log('✅ Esca compilata:', escaTrovata);
-                                    await parla(`Esca registrata: ${escaTrovata}`);
+                            for (let tentativo = 1; tentativo <= 3; tentativo++) {
+                                // Prima domanda o ripetizione
+                                if (tentativo === 1) {
+                                    await parla('Esca?');
                                 } else {
-                                    console.log('⚠️ Esca non trovata in lista:', rispostaEsca);
-                                    console.log('💡 Esche disponibili:', escheMemorizzate.join(', '));
-                                    await parla(`Esca non riconosciuta. Ho sentito: ${rispostaEsca}. Aggiungila manualmente.`);
+                                    await parla('Non ho capito bene. Ripeti l\'esca?');
+                                }
+
+                                const rispostaEsca = await ascolta();
+
+                                if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
+                                    // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
+                                    console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaEsca);
+                                    console.log('📋 Esche disponibili:', escheMemorizzate);
+
+                                    // Validazione: controlla se l'esca esiste in lista (case-insensitive)
+                                    escaTrovata = escheMemorizzate.find(e =>
+                                        e.toLowerCase() === rispostaEsca.toLowerCase()
+                                    );
+
+                                    if (escaTrovata) {
+                                        // Esca trovata! Compila e esci dal loop
+                                        setNuovaCattura(prev => ({ ...prev, esca: escaTrovata }));
+                                        datiCatturaVocaleRef.current.esca = escaTrovata;
+                                        console.log('✅ Esca compilata:', escaTrovata);
+                                        await parla(`Esca registrata: ${escaTrovata}`);
+                                        break; // Esci dal loop
+                                    } else {
+                                        // Esca non trovata
+                                        console.log(`⚠️ Tentativo ${tentativo} - Esca non trovata:`, rispostaEsca);
+
+                                        if (tentativo === 3) {
+                                            // Ultimo tentativo fallito
+                                            console.log('❌ Esca non riconosciuta dopo 3 tentativi');
+                                            await parla('Esca non riconosciuta dopo tre tentativi. Aggiungila manualmente.');
+                                        }
+                                        // Se tentativo < 3, il loop continua e chiederà "Ripeti l'esca?"
+                                    }
                                 }
                             }
 
