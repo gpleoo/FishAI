@@ -54,6 +54,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
         const Plus = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14m-7-7v14"/></svg>;
         const Trash2 = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>;
         const Edit = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+        const Mic = (props) => <svg {...props} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>;
 
         const InputField = ({ label, value, onChange, type = "text", placeholder = "", min, max, step }) => (
             <div className="mb-4">
@@ -220,7 +221,14 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [valoreEditSpecie, setValoreEditSpecie] = useState('');
             const [editandoEsca, setEditandoEsca] = useState(null);
             const [valoreEditEsca, setValoreEditEsca] = useState('');
-            
+
+            // Stati Assistente Vocale
+            const [assistenteVocaleAttivo, setAssistenteVocaleAttivo] = useState(false);
+            const [statoConversazione, setStatoConversazione] = useState('INATTIVO'); // INATTIVO, SPECIE, LUNGHEZZA, ESCA, CONFERMA_METEO, CONFERMA_REGISTRA
+            const [messaggioVocale, setMessaggioVocale] = useState('');
+            const [riconoscimentoAttivo, setRiconoscimentoAttivo] = useState(false);
+            const recognitionRef = useRef(null);
+
             const mapRef = useRef(null);
             
             useEffect(() => { try { localStorage.setItem('diarioPesca_catture', JSON.stringify(catture)); } catch (e) { console.error('Errore salvataggio catture:', e); } }, [catture]);
@@ -491,7 +499,376 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 setEscheMemorizzate(nuoveEsche);
                 setEditandoEsca(null);
             };
-            
+
+            // ======== FUNZIONI ASSISTENTE VOCALE ========
+
+            // Sintesi vocale: l'app PARLA
+            const parla = (testo) => {
+                return new Promise((resolve) => {
+                    try {
+                        if (!('speechSynthesis' in window)) {
+                            console.warn('Sintesi vocale non supportata');
+                            resolve();
+                            return;
+                        }
+
+                        // Ferma eventuali speech in corso
+                        window.speechSynthesis.cancel();
+
+                        const utterance = new SpeechSynthesisUtterance(testo);
+                        utterance.lang = 'it-IT';
+                        utterance.rate = 0.9; // Velocità leggermente più lenta per chiarezza
+                        utterance.pitch = 1.0;
+                        utterance.volume = 1.0;
+
+                        utterance.onend = () => resolve();
+                        utterance.onerror = () => resolve();
+
+                        setMessaggioVocale(`🗣️ ${testo}`);
+                        window.speechSynthesis.speak(utterance);
+                    } catch (e) {
+                        console.error('Errore sintesi vocale:', e);
+                        resolve();
+                    }
+                });
+            };
+
+            // Riconoscimento vocale: l'app ASCOLTA
+            const ascolta = () => {
+                return new Promise((resolve, reject) => {
+                    try {
+                        // Supporto cross-browser
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                        if (!SpeechRecognition) {
+                            reject(new Error('Riconoscimento vocale non supportato'));
+                            return;
+                        }
+
+                        const recognition = new SpeechRecognition();
+                        recognition.lang = 'it-IT';
+                        recognition.continuous = false;
+                        recognition.interimResults = false;
+                        recognition.maxAlternatives = 1;
+
+                        recognitionRef.current = recognition;
+
+                        recognition.onstart = () => {
+                            setRiconoscimentoAttivo(true);
+                            setMessaggioVocale('🎤 In ascolto...');
+                        };
+
+                        recognition.onresult = (event) => {
+                            const risposta = event.results[0][0].transcript.toLowerCase().trim();
+                            console.log('🎤 Risposta ricevuta:', risposta);
+                            setMessaggioVocale(`✅ Hai detto: "${risposta}"`);
+                            setRiconoscimentoAttivo(false);
+                            resolve(risposta);
+                        };
+
+                        recognition.onerror = (event) => {
+                            console.error('Errore riconoscimento:', event.error);
+                            setRiconoscimentoAttivo(false);
+
+                            if (event.error === 'no-speech') {
+                                setMessaggioVocale('⚠️ Nessuna voce rilevata');
+                            } else if (event.error === 'not-allowed') {
+                                setMessaggioVocale('❌ Permesso microfono negato');
+                            } else {
+                                setMessaggioVocale('❌ Errore ascolto');
+                            }
+
+                            reject(new Error(event.error));
+                        };
+
+                        recognition.onend = () => {
+                            setRiconoscimentoAttivo(false);
+                        };
+
+                        recognition.start();
+                    } catch (e) {
+                        console.error('Errore avvio riconoscimento:', e);
+                        setRiconoscimentoAttivo(false);
+                        reject(e);
+                    }
+                });
+            };
+
+            // Parsing risposta intelligente per lunghezza
+            const estraiLunghezza = (testo) => {
+                // Cerca numeri nel testo
+                const match = testo.match(/(\d+)/);
+                if (match) {
+                    return match[1];
+                }
+
+                // Converti parole in numeri (es: "quaranta" -> "40")
+                const numeriParole = {
+                    'zero': '0', 'uno': '1', 'due': '2', 'tre': '3', 'quattro': '4',
+                    'cinque': '5', 'sei': '6', 'sette': '7', 'otto': '8', 'nove': '9',
+                    'dieci': '10', 'venti': '20', 'trenta': '30', 'quaranta': '40',
+                    'cinquanta': '50', 'sessanta': '60', 'settanta': '70', 'ottanta': '80', 'novanta': '90'
+                };
+
+                for (const [parola, numero] of Object.entries(numeriParole)) {
+                    if (testo.includes(parola)) {
+                        return numero;
+                    }
+                }
+
+                return testo; // Ritorna testo originale se non trova numeri
+            };
+
+            // Riconosce conferma (sì/no)
+            const èConferma = (testo) => {
+                const affermazioni = ['sì', 'si', 'ok', 'okay', 'va bene', 'conferma', 'confermo', 'yes', 'certo', 'esatto'];
+                return affermazioni.some(parola => testo.includes(parola));
+            };
+
+            // Macchina a stati conversazionale
+            const gestisciStatoConversazione = async (stato, risposta = null) => {
+                try {
+                    switch (stato) {
+                        case 'SPECIE':
+                            await parla('Specie?');
+                            const rispostaSpecie = await ascolta();
+
+                            if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
+                                setNuovaCattura(prev => ({ ...prev, specie: rispostaSpecie }));
+                                console.log('✅ Specie compilata:', rispostaSpecie);
+                            }
+
+                            setStatoConversazione('LUNGHEZZA');
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await gestisciStatoConversazione('LUNGHEZZA');
+                            break;
+
+                        case 'LUNGHEZZA':
+                            await parla('Lunghezza?');
+                            const rispostaLunghezza = await ascolta();
+
+                            if (rispostaLunghezza && rispostaLunghezza !== 'salta' && rispostaLunghezza !== 'vuoto') {
+                                const lunghezzaEstratta = estraiLunghezza(rispostaLunghezza);
+                                setNuovaCattura(prev => ({ ...prev, lunghezza: lunghezzaEstratta }));
+                                console.log('✅ Lunghezza compilata:', lunghezzaEstratta);
+                            }
+
+                            setStatoConversazione('ESCA');
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await gestisciStatoConversazione('ESCA');
+                            break;
+
+                        case 'ESCA':
+                            await parla('Esca?');
+                            const rispostaEsca = await ascolta();
+
+                            if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
+                                setNuovaCattura(prev => ({ ...prev, esca: rispostaEsca }));
+                                console.log('✅ Esca compilata:', rispostaEsca);
+                            }
+
+                            setStatoConversazione('CONFERMA_METEO');
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await gestisciStatoConversazione('CONFERMA_METEO');
+                            break;
+
+                        case 'CONFERMA_METEO':
+                            await parla('Confermi dati meteo?');
+                            const rispostaConfermaMeteo = await ascolta();
+
+                            if (èConferma(rispostaConfermaMeteo)) {
+                                // Simula click su conferma meteo
+                                setDatiMeteoConfermati(meteo);
+                                console.log('✅ Dati meteo confermati');
+                                await parla('Dati meteo confermati');
+                            } else {
+                                await parla('Dati meteo non confermati. Puoi confermarli manualmente.');
+                            }
+
+                            setStatoConversazione('CONFERMA_REGISTRA');
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await gestisciStatoConversazione('CONFERMA_REGISTRA');
+                            break;
+
+                        case 'CONFERMA_REGISTRA':
+                            await parla('Registra cattura?');
+                            const rispostaRegistra = await ascolta();
+
+                            if (èConferma(rispostaRegistra)) {
+                                // Esegui la registrazione
+                                await registraCatturaVocale();
+                            } else {
+                                await parla('Cattura non registrata. Puoi registrarla manualmente.');
+                                fermaAssistenteVocale();
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Errore conversazione:', error);
+                    setMessaggioVocale('⚠️ Errore durante la conversazione. Puoi compilare manualmente.');
+                    fermaAssistenteVocale();
+                }
+            };
+
+            // Registra cattura via vocale
+            const registraCatturaVocale = async () => {
+                try {
+                    // Validazione (simile a aggiungiCattura)
+                    if (!sessioneAttiva) {
+                        await parla('Errore: avvia prima una sessione di pesca');
+                        fermaAssistenteVocale();
+                        return;
+                    }
+
+                    if (!datiMeteoConfermati) {
+                        await parla('Errore: conferma prima i dati meteo');
+                        fermaAssistenteVocale();
+                        return;
+                    }
+
+                    if (!nuovaCattura.specie) {
+                        await parla('Errore: inserisci la specie della cattura');
+                        fermaAssistenteVocale();
+                        return;
+                    }
+
+                    // Validazione coordinate
+                    if (nuovaCattura.latitudine && nuovaCattura.longitudine) {
+                        const validazione = validaCoordinate(nuovaCattura.latitudine, nuovaCattura.longitudine);
+                        if (!validazione.valid) {
+                            await parla(`Errore coordinate: ${validazione.error}`);
+                            fermaAssistenteVocale();
+                            return;
+                        }
+                    }
+
+                    // Aggiungi a liste memorizzate
+                    if (nuovaCattura.specie && !specieMemorizzate.includes(nuovaCattura.specie)) {
+                        setSpecieMemorizzate([...specieMemorizzate, nuovaCattura.specie]);
+                    }
+                    if (nuovaCattura.esca && !escheMemorizzate.includes(nuovaCattura.esca)) {
+                        setEscheMemorizzate([...escheMemorizzate, nuovaCattura.esca]);
+                    }
+                    if (nuovaCattura.localita && !localitaMemorizzate.includes(nuovaCattura.localita)) {
+                        setLocalitaMemorizzate([...localitaMemorizzate, nuovaCattura.localita]);
+                    }
+                    if (nuovaCattura.note && !noteMemorizzate.includes(nuovaCattura.note)) {
+                        setNoteMemorizzate([...noteMemorizzate, nuovaCattura.note]);
+                    }
+                    if (nuovaCattura.canna && !canneMemorizzate.includes(nuovaCattura.canna)) {
+                        setCanneMemorizzate([...canneMemorizzate, nuovaCattura.canna]);
+                    }
+                    if (nuovaCattura.trave && !traviMemorizzate.includes(nuovaCattura.trave)) {
+                        setTraviMemorizzate([...traviMemorizzate, nuovaCattura.trave]);
+                    }
+                    if (nuovaCattura.amo && !amiMemorizzati.includes(nuovaCattura.amo)) {
+                        setAmiMemorizzati([...amiMemorizzati, nuovaCattura.amo]);
+                    }
+                    if (nuovaCattura.piombo && !piombiMemorizzati.includes(nuovaCattura.piombo)) {
+                        setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
+                    }
+
+                    // Salva cattura
+                    const meteoSalvato = datiMeteoConfermati;
+                    setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
+
+                    // Mostra registro
+                    setMostraRegistro(true);
+                    setActiveSection('analisi');
+
+                    // Reset form
+                    setNuovaCattura({
+                        data: getDataItalianaAttuale(),
+                        ora: getOraItalianaAttuale(),
+                        specie: '',
+                        peso: '',
+                        lunghezza: '',
+                        localita: sessioneAttiva ? datiSessione.localita : '',
+                        latitudine: sessioneAttiva ? datiSessione.latitudine : '',
+                        longitudine: sessioneAttiva ? datiSessione.longitudine : '',
+                        esca: '',
+                        canna: '',
+                        trave: '',
+                        amo: '',
+                        piombo: '',
+                        note: ''
+                    });
+                    setDatiMeteoConfermati(null);
+
+                    // Feedback vocale
+                    await parla('Cattura registrata!');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Resetta per nuova cattura
+                    setStatoConversazione('SPECIE');
+                    setMessaggioVocale('✅ Pronto per nuova cattura');
+
+                    // Ricomincia conversazione
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    await gestisciStatoConversazione('SPECIE');
+
+                } catch (error) {
+                    console.error('Errore registrazione vocale:', error);
+                    await parla('Errore durante la registrazione');
+                    fermaAssistenteVocale();
+                }
+            };
+
+            // Avvia assistente vocale
+            const avviaAssistenteVocale = async () => {
+                try {
+                    // Verifica supporto browser
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    if (!SpeechRecognition) {
+                        alert('❌ Riconoscimento vocale non supportato dal tuo browser.\n\nProva con Chrome o Safari.');
+                        return;
+                    }
+
+                    if (!('speechSynthesis' in window)) {
+                        alert('⚠️ Sintesi vocale non supportata. L\'assistente funzionerà solo in modalità ascolto.');
+                    }
+
+                    setAssistenteVocaleAttivo(true);
+                    setStatoConversazione('SPECIE');
+                    setMessaggioVocale('🎤 Assistente vocale avviato');
+
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await gestisciStatoConversazione('SPECIE');
+
+                } catch (error) {
+                    console.error('Errore avvio assistente:', error);
+                    alert('❌ Errore avvio assistente vocale: ' + error.message);
+                    fermaAssistenteVocale();
+                }
+            };
+
+            // Ferma assistente vocale
+            const fermaAssistenteVocale = () => {
+                // Ferma riconoscimento vocale
+                if (recognitionRef.current) {
+                    try {
+                        recognitionRef.current.abort();
+                    } catch (e) {
+                        console.error('Errore stop recognition:', e);
+                    }
+                }
+
+                // Ferma sintesi vocale
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+
+                setAssistenteVocaleAttivo(false);
+                setStatoConversazione('INATTIVO');
+                setMessaggioVocale('');
+                setRiconoscimentoAttivo(false);
+            };
+
+            // ======== FINE FUNZIONI ASSISTENTE VOCALE ========
+
             const validaCoordinate = (lat, lng) => {
                 const latNum = parseFloat(lat);
                 const lngNum = parseFloat(lng);
@@ -827,7 +1204,46 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     obbligatori: sessione + meteo + specie | resto opzionale
                                 </p>
                             </div>
-                            
+
+                            {/* ASSISTENTE VOCALE */}
+                            <div className="mb-6">
+                                {!assistenteVocaleAttivo ? (
+                                    <button
+                                        onClick={avviaAssistenteVocale}
+                                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:from-purple-700 hover:to-blue-700 active:scale-95 transition-all"
+                                    >
+                                        <Mic width={24} height={24} />
+                                        <span>🎤 Assistente Vocale</span>
+                                    </button>
+                                ) : (
+                                    <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-2 border-purple-500 rounded-lg p-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-3 h-3 rounded-full ${riconoscimentoAttivo ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></div>
+                                                <span className="text-white font-bold">
+                                                    {riconoscimentoAttivo ? '🔴 In ascolto...' : '🟢 Assistente Attivo'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={fermaAssistenteVocale}
+                                                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-700 active:scale-95 transition-all"
+                                            >
+                                                ❌ Ferma
+                                            </button>
+                                        </div>
+                                        {messaggioVocale && (
+                                            <div className="bg-black/30 rounded-lg p-3 mb-2">
+                                                <p className="text-cyan-400 text-sm font-mono">{messaggioVocale}</p>
+                                            </div>
+                                        )}
+                                        <div className="text-gray-300 text-xs mt-2">
+                                            <p>📍 Stato: {statoConversazione}</p>
+                                            <p className="mt-1 text-yellow-400">💡 Puoi sempre compilare manualmente i campi</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             <InputField label="data" type="date" value={nuovaCattura.data} onChange={(e) => setNuovaCattura(p => ({...p, data: e.target.value}))} />
                             <InputField label="ora" value={nuovaCattura.ora} onChange={(e) => setNuovaCattura(p => ({...p, ora: e.target.value}))} />
                             <SelectField label="specie (obbligatorio)" value={nuovaCattura.specie} onChange={(e) => setNuovaCattura(p => ({...p, specie: e.target.value}))} options={specieMemorizzate} placeholder="spigola, orata..." />
