@@ -636,9 +636,20 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             const rispostaSpecie = await ascolta();
 
                             if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
-                                setNuovaCattura(prev => ({ ...prev, specie: rispostaSpecie }));
-                                datiCatturaVocaleRef.current.specie = rispostaSpecie; // Fix: salva in ref sincrono
-                                console.log('✅ Specie compilata:', rispostaSpecie);
+                                // Validazione: controlla se la specie esiste in lista (case-insensitive)
+                                const specieTrovata = specieMemorizzate.find(s =>
+                                    s.toLowerCase() === rispostaSpecie.toLowerCase()
+                                );
+
+                                if (specieTrovata) {
+                                    setNuovaCattura(prev => ({ ...prev, specie: specieTrovata }));
+                                    datiCatturaVocaleRef.current.specie = specieTrovata;
+                                    console.log('✅ Specie compilata:', specieTrovata);
+                                    await parla(`Specie registrata: ${specieTrovata}`);
+                                } else {
+                                    console.log('⚠️ Specie non trovata in lista:', rispostaSpecie);
+                                    await parla('Specie non riconosciuta. Aggiungila manualmente.');
+                                }
                             }
 
                             setStatoConversazione('LUNGHEZZA');
@@ -667,9 +678,20 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             const rispostaEsca = await ascolta();
 
                             if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
-                                setNuovaCattura(prev => ({ ...prev, esca: rispostaEsca }));
-                                datiCatturaVocaleRef.current.esca = rispostaEsca; // Fix: salva in ref sincrono
-                                console.log('✅ Esca compilata:', rispostaEsca);
+                                // Validazione: controlla se l'esca esiste in lista (case-insensitive)
+                                const escaTrovata = escheMemorizzate.find(e =>
+                                    e.toLowerCase() === rispostaEsca.toLowerCase()
+                                );
+
+                                if (escaTrovata) {
+                                    setNuovaCattura(prev => ({ ...prev, esca: escaTrovata }));
+                                    datiCatturaVocaleRef.current.esca = escaTrovata;
+                                    console.log('✅ Esca compilata:', escaTrovata);
+                                    await parla(`Esca registrata: ${escaTrovata}`);
+                                } else {
+                                    console.log('⚠️ Esca non trovata in lista:', rispostaEsca);
+                                    await parla('Esca non riconosciuta. Aggiungila manualmente.');
+                                }
                             }
 
                             setStatoConversazione('CONFERMA_METEO');
@@ -706,6 +728,37 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             } else {
                                 await parla('Cattura non registrata. Puoi registrarla manualmente.');
                                 fermaAssistenteVocale();
+                            }
+                            break;
+
+                        case 'IN_ATTESA_COMANDO':
+                            // Stato di attesa: ascolta solo per comando "nuova cattura"
+                            setMessaggioVocale('💬 Dì "nuova cattura" per registrare un\'altra cattura');
+                            const comandoRicevuto = await ascolta();
+
+                            // Riconosce varianti del comando "nuova cattura"
+                            if (comandoRicevuto &&
+                                (comandoRicevuto.includes('nuova cattura') ||
+                                 comandoRicevuto.includes('nuova') ||
+                                 comandoRicevuto.includes('cattura') ||
+                                 comandoRicevuto.includes('ancora') ||
+                                 comandoRicevuto.includes('un\'altra'))) {
+
+                                console.log('✅ Comando "nuova cattura" riconosciuto');
+                                await parla('Ok, nuova cattura');
+
+                                // Reset ref per nuova cattura
+                                datiCatturaVocaleRef.current = { specie: '', lunghezza: '', esca: '' };
+
+                                // Ricomincia conversazione
+                                setStatoConversazione('SPECIE');
+                                await new Promise(resolve => setTimeout(resolve, 800));
+                                await gestisciStatoConversazione('SPECIE');
+                            } else {
+                                // Comando non riconosciuto, continua ad ascoltare
+                                console.log('⚠️ Comando non riconosciuto, resto in attesa');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                await gestisciStatoConversazione('IN_ATTESA_COMANDO');
                             }
                             break;
 
@@ -797,7 +850,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         id: Date.now(),
                         sessioneId: sessioneCorrente.id
                     };
-                    setCatture([...catture, catturaFinale]);
+                    // Fix: usa forma funzionale per evitare sovrascrittura con registrazioni multiple
+                    setCatture(prev => [...prev, catturaFinale]);
 
                     // Mostra registro
                     setMostraRegistro(true);
@@ -826,13 +880,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     await parla('Cattura registrata!');
                     await new Promise(resolve => setTimeout(resolve, 1000));
 
-                    // Resetta per nuova cattura
-                    setStatoConversazione('SPECIE');
-                    setMessaggioVocale('✅ Pronto per nuova cattura');
-
-                    // Ricomincia conversazione
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    await gestisciStatoConversazione('SPECIE');
+                    // Passa in modalità attesa comando "nuova cattura"
+                    setStatoConversazione('IN_ATTESA_COMANDO');
+                    await parla('Dì nuova cattura per continuare');
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    await gestisciStatoConversazione('IN_ATTESA_COMANDO');
 
                 } catch (error) {
                     console.error('Errore registrazione vocale:', error);
