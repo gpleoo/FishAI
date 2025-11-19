@@ -636,6 +636,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             const rispostaSpecie = await ascolta();
 
                             if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
+                                // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
+                                console.log('🎤 Risposta riconosciuta:', rispostaSpecie);
+                                console.log('📋 Specie disponibili:', specieMemorizzate);
+
                                 // Validazione: controlla se la specie esiste in lista (case-insensitive)
                                 const specieTrovata = specieMemorizzate.find(s =>
                                     s.toLowerCase() === rispostaSpecie.toLowerCase()
@@ -648,7 +652,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     await parla(`Specie registrata: ${specieTrovata}`);
                                 } else {
                                     console.log('⚠️ Specie non trovata in lista:', rispostaSpecie);
-                                    await parla('Specie non riconosciuta. Aggiungila manualmente.');
+                                    console.log('💡 Specie disponibili:', specieMemorizzate.join(', '));
+                                    await parla(`Specie non riconosciuta. Ho sentito: ${rispostaSpecie}. Aggiungila manualmente.`);
                                 }
                             }
 
@@ -678,6 +683,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             const rispostaEsca = await ascolta();
 
                             if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
+                                // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
+                                console.log('🎤 Risposta riconosciuta:', rispostaEsca);
+                                console.log('📋 Esche disponibili:', escheMemorizzate);
+
                                 // Validazione: controlla se l'esca esiste in lista (case-insensitive)
                                 const escaTrovata = escheMemorizzate.find(e =>
                                     e.toLowerCase() === rispostaEsca.toLowerCase()
@@ -690,7 +699,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     await parla(`Esca registrata: ${escaTrovata}`);
                                 } else {
                                     console.log('⚠️ Esca non trovata in lista:', rispostaEsca);
-                                    await parla('Esca non riconosciuta. Aggiungila manualmente.');
+                                    console.log('💡 Esche disponibili:', escheMemorizzate.join(', '));
+                                    await parla(`Esca non riconosciuta. Ho sentito: ${rispostaEsca}. Aggiungila manualmente.`);
                                 }
                             }
 
