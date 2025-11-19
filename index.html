@@ -229,6 +229,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [riconoscimentoAttivo, setRiconoscimentoAttivo] = useState(false);
             const recognitionRef = useRef(null);
             const meteoConfermatiVocaleRef = useRef(null); // Fix: per sincronizzare conferma meteo
+            const datiCatturaVocaleRef = useRef({ specie: '', lunghezza: '', esca: '' }); // Fix: per sincronizzare dati cattura
 
             const mapRef = useRef(null);
             
@@ -636,6 +637,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
                             if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
                                 setNuovaCattura(prev => ({ ...prev, specie: rispostaSpecie }));
+                                datiCatturaVocaleRef.current.specie = rispostaSpecie; // Fix: salva in ref sincrono
                                 console.log('✅ Specie compilata:', rispostaSpecie);
                             }
 
@@ -651,6 +653,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             if (rispostaLunghezza && rispostaLunghezza !== 'salta' && rispostaLunghezza !== 'vuoto') {
                                 const lunghezzaEstratta = estraiLunghezza(rispostaLunghezza);
                                 setNuovaCattura(prev => ({ ...prev, lunghezza: lunghezzaEstratta }));
+                                datiCatturaVocaleRef.current.lunghezza = lunghezzaEstratta; // Fix: salva in ref sincrono
                                 console.log('✅ Lunghezza compilata:', lunghezzaEstratta);
                             }
 
@@ -665,6 +668,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
                             if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
                                 setNuovaCattura(prev => ({ ...prev, esca: rispostaEsca }));
+                                datiCatturaVocaleRef.current.esca = rispostaEsca; // Fix: salva in ref sincrono
                                 console.log('✅ Esca compilata:', rispostaEsca);
                             }
 
@@ -734,7 +738,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         return;
                     }
 
-                    if (!nuovaCattura.specie) {
+                    // Fix: usa ref se disponibile (compilato vocalmente), altrimenti usa state (compilato manualmente)
+                    const specieFinale = datiCatturaVocaleRef.current.specie || nuovaCattura.specie;
+
+                    if (!specieFinale) {
                         await parla('Errore: inserisci la specie della cattura');
                         fermaAssistenteVocale();
                         return;
@@ -750,12 +757,16 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         }
                     }
 
-                    // Aggiungi a liste memorizzate
-                    if (nuovaCattura.specie && !specieMemorizzate.includes(nuovaCattura.specie)) {
-                        setSpecieMemorizzate([...specieMemorizzate, nuovaCattura.specie]);
+                    // Fix: usa dati da ref per specie, lunghezza, esca se compilati vocalmente
+                    const lunghezzaFinale = datiCatturaVocaleRef.current.lunghezza || nuovaCattura.lunghezza;
+                    const escaFinale = datiCatturaVocaleRef.current.esca || nuovaCattura.esca;
+
+                    // Aggiungi a liste memorizzate (usa valori finali)
+                    if (specieFinale && !specieMemorizzate.includes(specieFinale)) {
+                        setSpecieMemorizzate([...specieMemorizzate, specieFinale]);
                     }
-                    if (nuovaCattura.esca && !escheMemorizzate.includes(nuovaCattura.esca)) {
-                        setEscheMemorizzate([...escheMemorizzate, nuovaCattura.esca]);
+                    if (escaFinale && !escheMemorizzate.includes(escaFinale)) {
+                        setEscheMemorizzate([...escheMemorizzate, escaFinale]);
                     }
                     if (nuovaCattura.localita && !localitaMemorizzate.includes(nuovaCattura.localita)) {
                         setLocalitaMemorizzate([...localitaMemorizzate, nuovaCattura.localita]);
@@ -776,8 +787,17 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
                     }
 
-                    // Salva cattura (usa meteoSalvato già dichiarato sopra)
-                    setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
+                    // Salva cattura con valori finali (usa meteoSalvato già dichiarato sopra)
+                    const catturaFinale = {
+                        ...nuovaCattura,
+                        specie: specieFinale,
+                        lunghezza: lunghezzaFinale,
+                        esca: escaFinale,
+                        meteo: {...meteoSalvato},
+                        id: Date.now(),
+                        sessioneId: sessioneCorrente.id
+                    };
+                    setCatture([...catture, catturaFinale]);
 
                     // Mostra registro
                     setMostraRegistro(true);
@@ -870,6 +890,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 setMessaggioVocale('');
                 setRiconoscimentoAttivo(false);
                 meteoConfermatiVocaleRef.current = null; // Reset ref meteo confermati
+                datiCatturaVocaleRef.current = { specie: '', lunghezza: '', esca: '' }; // Reset ref dati cattura vocale
             };
 
             // ======== FINE FUNZIONI ASSISTENTE VOCALE ========
