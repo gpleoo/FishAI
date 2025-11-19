@@ -228,6 +228,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [messaggioVocale, setMessaggioVocale] = useState('');
             const [riconoscimentoAttivo, setRiconoscimentoAttivo] = useState(false);
             const recognitionRef = useRef(null);
+            const meteoConfermatiVocaleRef = useRef(null); // Fix: per sincronizzare conferma meteo
 
             const mapRef = useRef(null);
             
@@ -679,7 +680,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             if (èConferma(rispostaConfermaMeteo)) {
                                 // Simula click su conferma meteo
                                 setDatiMeteoConfermati(meteo);
-                                console.log('✅ Dati meteo confermati');
+                                meteoConfermatiVocaleRef.current = meteo; // Fix: salva in ref per accesso sincrono
+                                console.log('✅ Dati meteo confermati vocalmente');
                                 await parla('Dati meteo confermati');
                             } else {
                                 await parla('Dati meteo non confermati. Puoi confermarli manualmente.');
@@ -723,7 +725,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         return;
                     }
 
-                    if (!datiMeteoConfermati) {
+                    // Fix: usa ref se disponibile (confermati vocalmente), altrimenti usa stato (confermati manualmente)
+                    const meteoSalvato = meteoConfermatiVocaleRef.current || datiMeteoConfermati;
+
+                    if (!meteoSalvato) {
                         await parla('Errore: conferma prima i dati meteo');
                         fermaAssistenteVocale();
                         return;
@@ -771,8 +776,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
                     }
 
-                    // Salva cattura
-                    const meteoSalvato = datiMeteoConfermati;
+                    // Salva cattura (usa meteoSalvato già dichiarato sopra)
                     setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
 
                     // Mostra registro
@@ -865,6 +869,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 setStatoConversazione('INATTIVO');
                 setMessaggioVocale('');
                 setRiconoscimentoAttivo(false);
+                meteoConfermatiVocaleRef.current = null; // Reset ref meteo confermati
             };
 
             // ======== FINE FUNZIONI ASSISTENTE VOCALE ========
