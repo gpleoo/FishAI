@@ -232,9 +232,15 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const recognitionRef = useRef(null);
             const meteoConfermatiVocaleRef = useRef(null); // Fix: per sincronizzare conferma meteo
             const datiCatturaVocaleRef = useRef({ specie: '', lunghezza: '', esca: '' }); // Fix: per sincronizzare dati cattura
+            const specieMemorizzateVocaleRef = useRef([]); // Fix: per sincronizzare lista specie aggiornata
+            const escheMemorizzateVocaleRef = useRef([]); // Fix: per sincronizzare lista esche aggiornata
 
             const mapRef = useRef(null);
-            
+
+            // Sincronizza ref con liste specie/esche quando cambiano (fix bug riconoscimento vocale dopo aggiunta)
+            useEffect(() => { specieMemorizzateVocaleRef.current = specieMemorizzate; }, [specieMemorizzate]);
+            useEffect(() => { escheMemorizzateVocaleRef.current = escheMemorizzate; }, [escheMemorizzate]);
+
             useEffect(() => { try { localStorage.setItem('diarioPesca_catture', JSON.stringify(catture)); } catch (e) { console.error('Errore salvataggio catture:', e); } }, [catture]);
             useEffect(() => { try { localStorage.setItem('diarioPesca_specie', JSON.stringify(specieMemorizzate)); } catch (e) { console.error('Errore salvataggio specie:', e); } }, [specieMemorizzate]);
             useEffect(() => { try { localStorage.setItem('diarioPesca_esche', JSON.stringify(escheMemorizzate)); } catch (e) { console.error('Errore salvataggio esche:', e); } }, [escheMemorizzate]);
@@ -330,6 +336,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             };
 
             const terminaSessione = () => {
+                // Fix: chiudi assistente vocale se attivo quando termina sessione
+                if (assistenteVocaleAttivo) {
+                    fermaAssistenteVocale();
+                }
+
                 if (sessioneCorrente) {
                     // Conta SOLO le catture con l'ID di questa sessione specifica
                     const cattureQuesta = catture.filter(c => c.sessioneId === sessioneCorrente.id).length;
@@ -341,14 +352,14 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         oraFine: getOraItalianaAttuale(),
                         numeroCatture: cattureQuesta
                     };
-                    
+
                     // Aggiungi alle sessioni completate
                     setSessioniCompletate([...sessioniCompletate, sessioneCompletata]);
                 }
-                
-                setSessioneAttiva(false); 
+
+                setSessioneAttiva(false);
                 setSessioneCorrente(null);
-                setDatiSessione({ localita: '', latitudine: '', longitudine: '' }); 
+                setDatiSessione({ localita: '', latitudine: '', longitudine: '' });
             };
             
             const ottieniPosizioneGPS = () => {
@@ -651,10 +662,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 if (rispostaSpecie && rispostaSpecie !== 'salta' && rispostaSpecie !== 'vuoto') {
                                     // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
                                     console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaSpecie);
-                                    console.log('📋 Specie disponibili:', specieMemorizzate);
+                                    console.log('📋 Specie disponibili (ref):', specieMemorizzateVocaleRef.current);
 
-                                    // Validazione: controlla se la specie esiste in lista (case-insensitive)
-                                    specieTrovata = specieMemorizzate.find(s =>
+                                    // Validazione: usa ref per lista sempre aggiornata (fix bug specie appena salvata)
+                                    specieTrovata = specieMemorizzateVocaleRef.current.find(s =>
                                         s.toLowerCase() === rispostaSpecie.toLowerCase()
                                     );
 
@@ -716,10 +727,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 if (rispostaEsca && rispostaEsca !== 'salta' && rispostaEsca !== 'vuoto') {
                                     // Debug: mostra cosa viene riconosciuto e cosa c'è nella lista
                                     console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaEsca);
-                                    console.log('📋 Esche disponibili:', escheMemorizzate);
+                                    console.log('📋 Esche disponibili (ref):', escheMemorizzateVocaleRef.current);
 
-                                    // Validazione: controlla se l'esca esiste in lista (case-insensitive)
-                                    escaTrovata = escheMemorizzate.find(e =>
+                                    // Validazione: usa ref per lista sempre aggiornata (fix bug esca appena salvata)
+                                    escaTrovata = escheMemorizzateVocaleRef.current.find(e =>
                                         e.toLowerCase() === rispostaEsca.toLowerCase()
                                     );
 
