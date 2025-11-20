@@ -643,7 +643,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             };
 
             // Macchina a stati conversazionale
-            const gestisciStatoConversazione = async (stato, risposta = null) => {
+            const gestisciStatoConversazione = async (stato, risposta = null, tentativoAttesa = 1) => {
                 try {
                     switch (stato) {
                         case 'SPECIE':
@@ -793,8 +793,18 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             break;
 
                         case 'IN_ATTESA_COMANDO':
+                            // Fix loop infinito: limite massimo di 5 tentativi in attesa
+                            const MAX_TENTATIVI_ATTESA = 5;
+
+                            if (tentativoAttesa > MAX_TENTATIVI_ATTESA) {
+                                console.log(`❌ Raggiunto limite di ${MAX_TENTATIVI_ATTESA} tentativi in attesa comando`);
+                                await parla('Nessun comando ricevuto. Assistente vocale terminato.');
+                                fermaAssistenteVocale();
+                                break;
+                            }
+
                             // Stato di attesa: ascolta solo per comando "nuova cattura"
-                            setMessaggioVocale('💬 Dì "nuova cattura" per registrare un\'altra cattura');
+                            setMessaggioVocale(`💬 Dì "nuova cattura" per registrare un\'altra cattura (tentativo ${tentativoAttesa}/${MAX_TENTATIVI_ATTESA})`);
                             const comandoRicevuto = await ascolta();
 
                             // Riconosce varianti del comando "nuova cattura"
@@ -811,15 +821,15 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 // Reset ref per nuova cattura
                                 datiCatturaVocaleRef.current = { specie: '', lunghezza: '', esca: '' };
 
-                                // Ricomincia conversazione
+                                // Ricomincia conversazione (reset tentativi)
                                 setStatoConversazione('SPECIE');
                                 await new Promise(resolve => setTimeout(resolve, 800));
                                 await gestisciStatoConversazione('SPECIE');
                             } else {
-                                // Comando non riconosciuto, continua ad ascoltare
-                                console.log('⚠️ Comando non riconosciuto, resto in attesa');
+                                // Comando non riconosciuto, continua ad ascoltare con contatore incrementato
+                                console.log(`⚠️ Comando non riconosciuto, resto in attesa (tentativo ${tentativoAttesa}/${MAX_TENTATIVI_ATTESA})`);
                                 await new Promise(resolve => setTimeout(resolve, 1000));
-                                await gestisciStatoConversazione('IN_ATTESA_COMANDO');
+                                await gestisciStatoConversazione('IN_ATTESA_COMANDO', null, tentativoAttesa + 1);
                             }
                             break;
 
