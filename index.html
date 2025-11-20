@@ -69,7 +69,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 <label className="block text-cyan-400 text-sm font-semibold mb-2">{label}</label>
                 <input list={`${label}-list`} value={value} onChange={onChange} placeholder={placeholder}
                     className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white text-lg focus:border-cyan-500 focus:outline-none" />
-                <datalist id={`${label}-list`}>{options.map((opt, i) => <option key={i} value={opt} />)}</datalist>
+                <datalist id={`${label}-list`}>{[...options].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((opt, i) => <option key={i} value={opt} />)}</datalist>
             </div>
         );
 
@@ -1470,7 +1470,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovaLocalita} onChange={(e) => setNuovaLocalita(e.target.value)} placeholder="es: molo di fiumicino..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {localitaMemorizzate.map((l, i) => (
+                                    {[...localitaMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((l, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             {editandoLocalita === l ? (
                                                 <input
@@ -1504,7 +1504,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovaSpecie} onChange={(e) => setNuovaSpecie(e.target.value)} placeholder="es: spigola, orata..."
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {specieMemorizzate.map((s, i) => (
+                                    {[...specieMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((s, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             {editandoSpecie === s ? (
                                                 <input
@@ -1538,7 +1538,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovaEsca} onChange={(e) => setNuovaEsca(e.target.value)} placeholder="es: minnow, sardina..."
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {escheMemorizzate.map((e, i) => (
+                                    {[...escheMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((e, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             {editandoEsca === e ? (
                                                 <input
@@ -1572,7 +1572,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovaCanna} onChange={(e) => setNuovaCanna(e.target.value)} placeholder="es: bolognese 6m..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {canneMemorizzate.map((c, i) => (
+                                    {[...canneMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((c, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             <span className="text-gray-300">{c}</span>
                                             <button onClick={() => setCanneMemorizzate(canneMemorizzate.filter(x => x !== c))} className="text-red-500"><Trash2 width={16} height={16} /></button>
@@ -1587,7 +1587,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovoTrave} onChange={(e) => setNuovoTrave(e.target.value)} placeholder="es: 0.20mm..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {traviMemorizzate.map((t, i) => (
+                                    {[...traviMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((t, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             <span className="text-gray-300">{t}</span>
                                             <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500"><Trash2 width={16} height={16} /></button>
@@ -1602,7 +1602,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovoAmo} onChange={(e) => setNuovoAmo(e.target.value)} placeholder="es: n.8..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {amiMemorizzati.map((a, i) => (
+                                    {[...amiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((a, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             <span className="text-gray-300">{a}</span>
                                             <button onClick={() => setAmiMemorizzati(amiMemorizzati.filter(x => x !== a))} className="text-red-500"><Trash2 width={16} height={16} /></button>
@@ -1617,7 +1617,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
                                     <input type="text" value={nuovoPiombo} onChange={(e) => setNuovoPiombo(e.target.value)} placeholder="es: 50g..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {piombiMemorizzati.map((p, i) => (
+                                    {[...piombiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((p, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             <span className="text-gray-300">{p}</span>
                                             <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500"><Trash2 width={16} height={16} /></button>
