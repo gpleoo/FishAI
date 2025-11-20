@@ -217,6 +217,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             
             const [datiMeteoConfermati, setDatiMeteoConfermati] = useState(null);
             const [mostraRegistro, setMostraRegistro] = useState(false);
+            const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(true); // Collassabile: gestione sessioni
+            const [mostraCatture, setMostraCatture] = useState(true); // Collassabile: mostra catture
             const [messaggioErrore, setMessaggioErrore] = useState('');
             const [nuovaSpecie, setNuovaSpecie] = useState('');
             const [nuovaEsca, setNuovaEsca] = useState('');
@@ -1662,14 +1664,25 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     )}
                                     
                                     {sessioniCompletate.length > 0 && (
-                                        <div className="mb-6 bg-gray-800 rounded-lg p-4 border-2 border-orange-500">
-                                            <h3 className="text-orange-400 font-bold mb-4 text-center text-xl">
-                                                📋 gestione sessioni registrate
-                                            </h3>
-                                            <p className="text-gray-400 text-sm mb-4 text-center">
-                                                Cancella sessioni con coordinate errate
-                                            </p>
-                                            <div className="space-y-2">
+                                        <div className="mb-6 bg-gray-800 rounded-lg border-2 border-orange-500">
+                                            <button
+                                                onClick={() => setMostraGestioneSessioni(!mostraGestioneSessioni)}
+                                                className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                            >
+                                                <h3 className="text-orange-400 font-bold text-xl flex items-center gap-2">
+                                                    📋 gestione sessioni registrate
+                                                </h3>
+                                                {mostraGestioneSessioni ?
+                                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                                }
+                                            </button>
+                                            {mostraGestioneSessioni && (
+                                                <div className="p-4 pt-0">
+                                                    <p className="text-gray-400 text-sm mb-4 text-center">
+                                                        Cancella sessioni con coordinate errate
+                                                    </p>
+                                                    <div className="space-y-2">
                                                 {sessioniCompletate.map((sessione) => {
                                                     const validazione = validaCoordinate(sessione.latitudine, sessione.longitudine);
                                                     return (
@@ -1700,7 +1713,9 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                         </div>
                                                     );
                                                 })}
-                                            </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     
@@ -1799,8 +1814,21 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     )}
 
                                     {mostraRegistro && (
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-bold text-cyan-400 mb-4">registro ({getCattureFiltrate().length} catture)</h3>
+                                        <div className="bg-gray-800 rounded-lg border-2 border-cyan-500 mb-6">
+                                            <button
+                                                onClick={() => setMostraCatture(!mostraCatture)}
+                                                className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                            >
+                                                <h3 className="text-cyan-400 font-bold text-xl flex items-center gap-2">
+                                                    📊 registro catture ({getCattureFiltrate().length})
+                                                </h3>
+                                                {mostraCatture ?
+                                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                                }
+                                            </button>
+                                            {mostraCatture && (
+                                                <div className="p-4 pt-0 space-y-4">
                                             {getCattureFiltrate().map(c => (
                                                 <div key={c.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                                                     <div className="flex justify-between mb-2">
@@ -1848,6 +1876,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                     )}
                                                 </div>
                                             ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
