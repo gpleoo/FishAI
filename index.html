@@ -101,7 +101,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [specieMemorizzate, setSpecieMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_specie');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento specie:', e);
                     return [];
@@ -110,7 +111,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [escheMemorizzate, setEscheMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_esche');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento esche:', e);
                     return [];
@@ -119,7 +121,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [localitaMemorizzate, setLocalitaMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_localita');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento località:', e);
                     return [];
@@ -128,7 +131,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [noteMemorizzate, setNoteMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_note');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento note:', e);
                     return [];
@@ -137,7 +141,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [canneMemorizzate, setCanneMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_canne');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento canne:', e);
                     return [];
@@ -146,7 +151,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [traviMemorizzate, setTraviMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_travi');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento travi:', e);
                     return [];
@@ -155,7 +161,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [amiMemorizzati, setAmiMemorizzati] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_ami');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento ami:', e);
                     return [];
@@ -164,7 +171,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [piombiMemorizzati, setPiombiMemorizzati] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_piombi');
-                    return salvate ? JSON.parse(salvate) : [];
+                    const array = salvate ? JSON.parse(salvate) : [];
+                    return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento piombi:', e);
                     return [];
@@ -464,13 +472,13 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 alert('✅ Cattura registrata con successo!');
             };
 
-            const aggiungiSpecie = () => { if (nuovaSpecie.trim() && !specieMemorizzate.includes(nuovaSpecie.trim())) { setSpecieMemorizzate([...specieMemorizzate, nuovaSpecie.trim()]); setNuovaSpecie(''); }};
-            const aggiungiEsca = () => { if (nuovaEsca.trim() && !escheMemorizzate.includes(nuovaEsca.trim())) { setEscheMemorizzate([...escheMemorizzate, nuovaEsca.trim()]); setNuovaEsca(''); }};
-            const aggiungiCanna = () => { if (nuovaCanna.trim() && !canneMemorizzate.includes(nuovaCanna.trim())) { setCanneMemorizzate([...canneMemorizzate, nuovaCanna.trim()]); setNuovaCanna(''); }};
-            const aggiungiTrave = () => { if (nuovoTrave.trim() && !traviMemorizzate.includes(nuovoTrave.trim())) { setTraviMemorizzate([...traviMemorizzate, nuovoTrave.trim()]); setNuovoTrave(''); }};
-            const aggiungiAmo = () => { if (nuovoAmo.trim() && !amiMemorizzati.includes(nuovoAmo.trim())) { setAmiMemorizzati([...amiMemorizzati, nuovoAmo.trim()]); setNuovoAmo(''); }};
-            const aggiungiPiombo = () => { if (nuovoPiombo.trim() && !piombiMemorizzati.includes(nuovoPiombo.trim())) { setPiombiMemorizzati([...piombiMemorizzati, nuovoPiombo.trim()]); setNuovoPiombo(''); }};
-            const aggiungiLocalita = () => { if (nuovaLocalita.trim() && !localitaMemorizzate.includes(nuovaLocalita.trim())) { setLocalitaMemorizzate([...localitaMemorizzate, nuovaLocalita.trim()]); setNuovaLocalita(''); }};
+            const aggiungiSpecie = () => { if (nuovaSpecie.trim() && !specieMemorizzate.includes(nuovaSpecie.trim())) { setSpecieMemorizzate([...specieMemorizzate, nuovaSpecie.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovaSpecie(''); }};
+            const aggiungiEsca = () => { if (nuovaEsca.trim() && !escheMemorizzate.includes(nuovaEsca.trim())) { setEscheMemorizzate([...escheMemorizzate, nuovaEsca.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovaEsca(''); }};
+            const aggiungiCanna = () => { if (nuovaCanna.trim() && !canneMemorizzate.includes(nuovaCanna.trim())) { setCanneMemorizzate([...canneMemorizzate, nuovaCanna.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovaCanna(''); }};
+            const aggiungiTrave = () => { if (nuovoTrave.trim() && !traviMemorizzate.includes(nuovoTrave.trim())) { setTraviMemorizzate([...traviMemorizzate, nuovoTrave.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovoTrave(''); }};
+            const aggiungiAmo = () => { if (nuovoAmo.trim() && !amiMemorizzati.includes(nuovoAmo.trim())) { setAmiMemorizzati([...amiMemorizzati, nuovoAmo.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovoAmo(''); }};
+            const aggiungiPiombo = () => { if (nuovoPiombo.trim() && !piombiMemorizzati.includes(nuovoPiombo.trim())) { setPiombiMemorizzati([...piombiMemorizzati, nuovoPiombo.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovoPiombo(''); }};
+            const aggiungiLocalita = () => { if (nuovaLocalita.trim() && !localitaMemorizzate.includes(nuovaLocalita.trim())) { setLocalitaMemorizzate([...localitaMemorizzate, nuovaLocalita.trim()].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }))); setNuovaLocalita(''); }};
             
             const modificaLocalita = (vecchioNome, nuovoNome) => {
                 if (!nuovoNome || !nuovoNome.trim()) {
@@ -483,7 +491,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     return;
                 }
                 const nuoveLocalita = localitaMemorizzate.map(l => l === vecchioNome ? nuovoNomeTrim : l);
-                setLocalitaMemorizzate(nuoveLocalita);
+                setLocalitaMemorizzate(nuoveLocalita.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
                 setEditandoLocalita(null);
             };
 
@@ -498,7 +506,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     return;
                 }
                 const nuoveSpecie = specieMemorizzate.map(s => s === vecchioNome ? nuovoNomeTrim : s);
-                setSpecieMemorizzate(nuoveSpecie);
+                setSpecieMemorizzate(nuoveSpecie.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
                 setEditandoSpecie(null);
             };
 
@@ -513,7 +521,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     return;
                 }
                 const nuoveEsche = escheMemorizzate.map(e => e === vecchioNome ? nuovoNomeTrim : e);
-                setEscheMemorizzate(nuoveEsche);
+                setEscheMemorizzate(nuoveEsche.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
                 setEditandoEsca(null);
             };
 
