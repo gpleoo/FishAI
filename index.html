@@ -1074,6 +1074,37 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                        (filtri.localita === 'tutte' || c.localita === filtri.localita);
             });
 
+            // Filtra sessioni in base ai filtri attivi (anno, mese, località + catture corrispondenti)
+            const getSessioniFiltrate = () => sessioniCompletate.filter(sessione => {
+                const [anno, mese] = sessione.dataInizio.split('-');
+
+                // Filtri base sessione (anno, mese, località)
+                const filtrataBase = (filtri.anno === 'tutti' || anno === filtri.anno) &&
+                                     (filtri.mese === 'tutti' || mese === filtri.mese) &&
+                                     (filtri.localita === 'tutte' || sessione.localita === filtri.localita);
+
+                if (!filtrataBase) return false;
+
+                // Se non ci sono filtri su specie/vento/meteo, la sessione passa
+                const haFiltriCatture = filtri.specie !== 'tutte' ||
+                                       filtri.direzioneVento !== 'tutte' ||
+                                       filtri.condizioni !== 'tutte';
+
+                if (!haFiltriCatture) return true;
+
+                // Controlla se ALMENO UNA cattura della sessione corrisponde ai filtri specie/vento/meteo
+                const cattureSessione = catture.filter(c => {
+                    // Catture della stessa data e località della sessione
+                    return c.data === sessione.dataInizio && c.localita === sessione.localita;
+                });
+
+                return cattureSessione.some(c => {
+                    return (filtri.specie === 'tutte' || c.specie === filtri.specie) &&
+                           (filtri.direzioneVento === 'tutte' || c.meteo?.direzioneVento === filtri.direzioneVento) &&
+                           (filtri.condizioni === 'tutte' || c.meteo?.condizioni === filtri.condizioni);
+                });
+            });
+
             const getAnniDisponibili = () => [...new Set(catture.map(c => c.data.split('-')[0]))].sort();
 
             const esportaDati = () => {
@@ -1133,15 +1164,17 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         
                         try {
                             // Filtra SOLO sessioni con coordinate VALIDE
-                            const sessioniValide = sessioniCompletate.filter(s => {
+                            // Usa sessioni filtrate invece di tutte le sessioni
+                            const sessioniFiltrate = getSessioniFiltrate();
+                            const sessioniValide = sessioniFiltrate.filter(s => {
                                 const val = validaCoordinate(s.latitudine, s.longitudine);
                                 if (!val.valid) {
                                     console.warn(`⚠️ Sessione "${s.localita}" saltata: ${val.error}`);
                                 }
                                 return val.valid;
                             });
-                            
-                            console.log(`✅ Sessioni valide: ${sessioniValide.length} su ${sessioniCompletate.length}`);
+
+                            console.log(`✅ Sessioni valide: ${sessioniValide.length} su ${sessioniFiltrate.length} (totali: ${sessioniCompletate.length})`);
                             
                             if (sessioniValide.length === 0) {
                                 console.error('❌ Nessuna sessione con coordinate valide!');
@@ -1670,7 +1703,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                 className="w-full flex items-center justify-between p-4 active:bg-gray-700"
                                             >
                                                 <h3 className="text-orange-400 font-bold text-xl flex items-center gap-2">
-                                                    📋 gestione sessioni registrate
+                                                    📋 gestione sessioni registrate ({getSessioniFiltrate().length}/{sessioniCompletate.length})
                                                 </h3>
                                                 {mostraGestioneSessioni ?
                                                     <ChevronUp className="text-cyan-400" width={24} height={24} /> :
@@ -1682,8 +1715,13 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                     <p className="text-gray-400 text-sm mb-4 text-center">
                                                         Cancella sessioni con coordinate errate
                                                     </p>
+                                                    {getSessioniFiltrate().length === 0 ? (
+                                                        <p className="text-yellow-400 text-center py-6">
+                                                            ⚠️ Nessuna sessione corrisponde ai filtri selezionati
+                                                        </p>
+                                                    ) : (
                                                     <div className="space-y-2">
-                                                {sessioniCompletate.map((sessione) => {
+                                                {getSessioniFiltrate().map((sessione) => {
                                                     const validazione = validaCoordinate(sessione.latitudine, sessione.longitudine);
                                                     return (
                                                         <div 
@@ -1714,6 +1752,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                     );
                                                 })}
                                                     </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
