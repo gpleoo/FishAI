@@ -39,11 +39,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); transform: scale(1.5); }
 
-        /* Animazione splash screen: fade in (0-0.5s), visibile (0.5-3.5s), fade out (3.5-4s) */
+        /* Animazione splash screen: fade in (0-1s), visibile (1-5s), fade out (5-6s) */
         @keyframes splashFade {
             0% { opacity: 0; }
-            12.5% { opacity: 1; }
-            87.5% { opacity: 1; }
+            16.67% { opacity: 1; }
+            83.33% { opacity: 1; }
             100% { opacity: 0; }
         }
     </style>
@@ -274,11 +274,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             useEffect(() => { try { localStorage.setItem('diarioPesca_sessioneCorrente', JSON.stringify(sessioneCorrente)); } catch (e) { console.error('Errore salvataggio sessione corrente:', e); } }, [sessioneCorrente]);
             useEffect(() => { try { localStorage.setItem('diarioPesca_sessioniCompletate', JSON.stringify(sessioniCompletate)); } catch (e) { console.error('Errore salvataggio sessioni completate:', e); } }, [sessioniCompletate]);
 
-            // Timer splash screen: mostra per 4 secondi poi nasconde
+            // Timer splash screen: mostra per 6 secondi poi nasconde
             useEffect(() => {
                 const timer = setTimeout(() => {
                     setMostraSplash(false);
-                }, 4000);
+                }, 6000);
                 return () => clearTimeout(timer);
             }, []);
 
@@ -1352,10 +1352,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             alignItems: 'center',
                             justifyContent: 'center',
                             zIndex: 9999,
-                            animation: 'splashFade 4s ease-in-out'
+                            animation: 'splashFade 6s ease-in-out'
                         }}>
                             <img
-                                src="https://github.com/gpleoo/FishAI/blob/main/immagine%20iniziale.png?raw=true"
+                                src="https://github.com/gpleoo/FishAI/blob/main/splash-screen.png?raw=true"
                                 alt="FishAI Splash"
                                 style={{
                                     maxWidth: '80%',
