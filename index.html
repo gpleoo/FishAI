@@ -39,12 +39,12 @@ Per richieste di autorizzazione, consultare il file LICENSE.
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); transform: scale(1.5); }
 
-        /* Animazione splash screen: fade in (0-1s), visibile (1-5s), fade out (5-6s) */
+        /* Animazione splash screen: fade in + crescita progressiva da 60% a 100% in 5s */
         @keyframes splashFade {
-            0% { opacity: 0; }
-            16.67% { opacity: 1; }
-            83.33% { opacity: 1; }
-            100% { opacity: 0; }
+            0% { opacity: 0; transform: scale(0.6); }
+            10% { opacity: 1; transform: scale(0.64); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1); }
         }
     </style>
 </head>
@@ -274,11 +274,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             useEffect(() => { try { localStorage.setItem('diarioPesca_sessioneCorrente', JSON.stringify(sessioneCorrente)); } catch (e) { console.error('Errore salvataggio sessione corrente:', e); } }, [sessioneCorrente]);
             useEffect(() => { try { localStorage.setItem('diarioPesca_sessioniCompletate', JSON.stringify(sessioniCompletate)); } catch (e) { console.error('Errore salvataggio sessioni completate:', e); } }, [sessioniCompletate]);
 
-            // Timer splash screen: mostra per 6 secondi poi nasconde
+            // Timer splash screen: mostra per 5 secondi poi nasconde
             useEffect(() => {
                 const timer = setTimeout(() => {
                     setMostraSplash(false);
-                }, 6000);
+                }, 5000);
                 return () => clearTimeout(timer);
             }, []);
 
@@ -482,8 +482,9 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 
                 setNuovaCattura({
                     data: getDataItalianaAttuale(), ora: getOraItalianaAttuale(), specie: '', peso: '', lunghezza: '',
-                    localita: sessioneAttiva ? datiSessione.localita : '', latitudine: sessioneAttiva ? datiSessione.latitudine : '', 
-                    longitudine: sessioneAttiva ? datiSessione.longitudine : '', esca: '', canna: '', trave: '', amo: '', piombo: '', note: ''
+                    localita: sessioneAttiva ? datiSessione.localita : '', latitudine: sessioneAttiva ? datiSessione.latitudine : '',
+                    longitudine: sessioneAttiva ? datiSessione.longitudine : '', esca: '',
+                    canna: nuovaCattura.canna, trave: nuovaCattura.trave, amo: nuovaCattura.amo, piombo: nuovaCattura.piombo, note: nuovaCattura.note
                 });
                 setDatiMeteoConfermati(null);
                 
@@ -1352,14 +1353,14 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             alignItems: 'center',
                             justifyContent: 'center',
                             zIndex: 9999,
-                            animation: 'splashFade 6s ease-in-out'
+                            animation: 'splashFade 5s ease-in-out'
                         }}>
                             <img
                                 src="https://github.com/gpleoo/FishAI/blob/main/splash-screen.png?raw=true"
                                 alt="FishAI Splash"
                                 style={{
-                                    maxWidth: '80%',
-                                    maxHeight: '80%',
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
                                     objectFit: 'contain'
                                 }}
                             />
