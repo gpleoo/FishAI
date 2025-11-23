@@ -232,8 +232,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             // Stati per paginazione e viste espanse
             const [paginaCatture, setPaginaCatture] = useState(0);
             const [paginaSessioni, setPaginaSessioni] = useState(0);
-            const [cattureEspanse, setCattureEspanse] = useState(new Set());
-            const [sessioniEspanse, setSessioniEspanse] = useState(new Set());
+            const [cattureEspanse, setCattureEspanse] = useState({});
+            const [sessioniEspanse, setSessioniEspanse] = useState({});
             const [messaggioErrore, setMessaggioErrore] = useState('');
             const [nuovaSpecie, setNuovaSpecie] = useState('');
             const [nuovaEsca, setNuovaEsca] = useState('');
@@ -287,6 +287,12 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 }, 5000);
                 return () => clearTimeout(timer);
             }, []);
+
+            // Reset pagine quando cambiano i filtri
+            useEffect(() => {
+                setPaginaCatture(0);
+                setPaginaSessioni(0);
+            }, [filtri]);
 
             const getOraItalianaAttuale = () => {
                 try {
@@ -1159,23 +1165,17 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const ITEMS_PER_PAGE = 10;
 
             const toggleCatturaEspansa = (id) => {
-                const nuove = new Set(cattureEspanse);
-                if (nuove.has(id)) {
-                    nuove.delete(id);
-                } else {
-                    nuove.add(id);
-                }
-                setCattureEspanse(nuove);
+                setCattureEspanse(prev => ({
+                    ...prev,
+                    [id]: !prev[id]
+                }));
             };
 
             const toggleSessioneEspansa = (id) => {
-                const nuove = new Set(sessioniEspanse);
-                if (nuove.has(id)) {
-                    nuove.delete(id);
-                } else {
-                    nuove.add(id);
-                }
-                setSessioniEspanse(nuove);
+                setSessioniEspanse(prev => ({
+                    ...prev,
+                    [id]: !prev[id]
+                }));
             };
 
             const getCatturePaginate = () => {
@@ -1192,8 +1192,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 return filtrate.slice(inizio, fine);
             };
 
-            const totalePagineCatture = Math.ceil(getCattureFiltrate().length / ITEMS_PER_PAGE);
-            const totalePagineSessioni = Math.ceil(getSessioniFiltrate().length / ITEMS_PER_PAGE);
+            const totalePagineCatture = Math.max(1, Math.ceil(getCattureFiltrate().length / ITEMS_PER_PAGE));
+            const totalePagineSessioni = Math.max(1, Math.ceil(getSessioniFiltrate().length / ITEMS_PER_PAGE));
 
             // Crea mappa con Leaflet - MIGLIORATO PER IPHONE E MARKER VISIBILI
             useEffect(() => {
@@ -1817,7 +1817,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                     <div className="space-y-2">
                                                 {getSessioniPaginate().map((sessione) => {
                                                     const validazione = validaCoordinate(sessione.latitudine, sessione.longitudine);
-                                                    const isEspansa = sessioniEspanse.has(sessione.id);
+                                                    const isEspansa = sessioniEspanse[sessione.id];
                                                     return (
                                                         <div
                                                             key={sessione.id}
@@ -2002,7 +2002,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                 <div className="p-4 pt-0">
                                                     <div className="space-y-3">
                                             {getCatturePaginate().map(c => {
-                                                const isEspansa = cattureEspanse.has(c.id);
+                                                const isEspansa = cattureEspanse[c.id];
                                                 return (
                                                 <div key={c.id} className="bg-gray-900 rounded-lg border border-gray-700">
                                                     <div
