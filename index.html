@@ -1124,8 +1124,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
                 // Controlla se ALMENO UNA cattura della sessione corrisponde ai filtri specie/vento/meteo
                 const cattureSessione = catture.filter(c => {
-                    // Catture della stessa data e località della sessione
-                    return c.data === sessione.dataInizio && c.localita === sessione.localita;
+                    // Catture appartenenti a questa sessione
+                    return c.sessioneId === sessione.id;
                 });
 
                 return cattureSessione.some(c => {
