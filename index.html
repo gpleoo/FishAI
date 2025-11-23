@@ -228,6 +228,12 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(true); // Collassabile: gestione sessioni
             const [mostraCatture, setMostraCatture] = useState(true); // Collassabile: mostra catture
             const [mostraSplash, setMostraSplash] = useState(true); // Splash screen iniziale
+
+            // Stati per paginazione e viste espanse
+            const [paginaCatture, setPaginaCatture] = useState(0);
+            const [paginaSessioni, setPaginaSessioni] = useState(0);
+            const [cattureEspanse, setCattureEspanse] = useState(new Set());
+            const [sessioniEspanse, setSessioniEspanse] = useState(new Set());
             const [messaggioErrore, setMessaggioErrore] = useState('');
             const [nuovaSpecie, setNuovaSpecie] = useState('');
             const [nuovaEsca, setNuovaEsca] = useState('');
@@ -1149,6 +1155,46 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 alert('esportato!');
             };
 
+            // Funzioni per paginazione e toggle espansione
+            const ITEMS_PER_PAGE = 10;
+
+            const toggleCatturaEspansa = (id) => {
+                const nuove = new Set(cattureEspanse);
+                if (nuove.has(id)) {
+                    nuove.delete(id);
+                } else {
+                    nuove.add(id);
+                }
+                setCattureEspanse(nuove);
+            };
+
+            const toggleSessioneEspansa = (id) => {
+                const nuove = new Set(sessioniEspanse);
+                if (nuove.has(id)) {
+                    nuove.delete(id);
+                } else {
+                    nuove.add(id);
+                }
+                setSessioniEspanse(nuove);
+            };
+
+            const getCatturePaginate = () => {
+                const filtrate = getCattureFiltrate();
+                const inizio = paginaCatture * ITEMS_PER_PAGE;
+                const fine = inizio + ITEMS_PER_PAGE;
+                return filtrate.slice(inizio, fine);
+            };
+
+            const getSessioniPaginate = () => {
+                const filtrate = getSessioniFiltrate();
+                const inizio = paginaSessioni * ITEMS_PER_PAGE;
+                const fine = inizio + ITEMS_PER_PAGE;
+                return filtrate.slice(inizio, fine);
+            };
+
+            const totalePagineCatture = Math.ceil(getCattureFiltrate().length / ITEMS_PER_PAGE);
+            const totalePagineSessioni = Math.ceil(getSessioniFiltrate().length / ITEMS_PER_PAGE);
+
             // Crea mappa con Leaflet - MIGLIORATO PER IPHONE E MARKER VISIBILI
             useEffect(() => {
                 if (activeSection === 'analisi' && sessioniCompletate.length > 0) {
@@ -1767,38 +1813,77 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                             ⚠️ Nessuna sessione corrisponde ai filtri selezionati
                                                         </p>
                                                     ) : (
+                                                    <>
                                                     <div className="space-y-2">
-                                                {getSessioniFiltrate().map((sessione) => {
+                                                {getSessioniPaginate().map((sessione) => {
                                                     const validazione = validaCoordinate(sessione.latitudine, sessione.longitudine);
+                                                    const isEspansa = sessioniEspanse.has(sessione.id);
                                                     return (
-                                                        <div 
-                                                            key={sessione.id} 
-                                                            className={`flex justify-between items-center p-3 rounded-lg ${validazione.valid ? 'bg-gray-900 border border-gray-700' : 'bg-red-900/30 border-2 border-red-500'}`}
+                                                        <div
+                                                            key={sessione.id}
+                                                            className={`rounded-lg ${validazione.valid ? 'bg-gray-900 border border-gray-700' : 'bg-red-900/30 border-2 border-red-500'}`}
                                                         >
-                                                            <div className="flex-1">
-                                                                <p className="text-white font-semibold">{sessione.localita}</p>
-                                                                <p className="text-gray-400 text-sm">
-                                                                    📅 {sessione.dataInizio} • ⏰ {sessione.oraInizio}-{sessione.oraFine} • 🎣 {sessione.numeroCatture} catture
-                                                                </p>
-                                                                <p className={`text-xs mt-1 ${validazione.valid ? 'text-green-400' : 'text-red-400'}`}>
-                                                                    📍 Lat: {sessione.latitudine}, Long: {sessione.longitudine}
-                                                                    {!validazione.valid && <span className="ml-2">⚠️ {validazione.error}</span>}
-                                                                </p>
-                                                            </div>
-                                                            <button 
-                                                                onClick={() => {
-                                                                    if (window.confirm(`Cancellare la sessione "${sessione.localita}" del ${sessione.dataInizio}?`)) {
-                                                                        setSessioniCompletate(sessioniCompletate.filter(s => s.id !== sessione.id));
-                                                                    }
-                                                                }}
-                                                                className="text-red-500 active:text-red-400 ml-3"
+                                                            <div
+                                                                onClick={() => toggleSessioneEspansa(sessione.id)}
+                                                                className="flex justify-between items-center p-3 cursor-pointer active:bg-gray-800"
                                                             >
-                                                                <Trash2 width={20} height={20} />
-                                                            </button>
+                                                                <div className="flex-1">
+                                                                    <p className="text-white font-semibold">{sessione.localita}</p>
+                                                                    {isEspansa && (
+                                                                        <>
+                                                                        <p className="text-gray-400 text-sm mt-2">
+                                                                            📅 {sessione.dataInizio} • ⏰ {sessione.oraInizio}-{sessione.oraFine} • 🎣 {sessione.numeroCatture} catture
+                                                                        </p>
+                                                                        <p className={`text-xs mt-1 ${validazione.valid ? 'text-green-400' : 'text-red-400'}`}>
+                                                                            📍 Lat: {sessione.latitudine}, Long: {sessione.longitudine}
+                                                                            {!validazione.valid && <span className="ml-2">⚠️ {validazione.error}</span>}
+                                                                        </p>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    {isEspansa ? <ChevronUp className="text-cyan-400" width={20} height={20} /> : <ChevronDown className="text-cyan-400" width={20} height={20} />}
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (window.confirm(`Cancellare la sessione "${sessione.localita}" del ${sessione.dataInizio}?`)) {
+                                                                                setSessioniCompletate(sessioniCompletate.filter(s => s.id !== sessione.id));
+                                                                            }
+                                                                        }}
+                                                                        className="text-red-500 active:text-red-400"
+                                                                    >
+                                                                        <Trash2 width={20} height={20} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     );
                                                 })}
                                                     </div>
+
+                                                    {/* Paginazione Sessioni */}
+                                                    {totalePagineSessioni > 1 && (
+                                                        <div className="flex items-center justify-center gap-3 mt-4">
+                                                            <button
+                                                                onClick={() => setPaginaSessioni(Math.max(0, paginaSessioni - 1))}
+                                                                disabled={paginaSessioni === 0}
+                                                                className="bg-cyan-600 text-white px-4 py-2 rounded-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-cyan-700"
+                                                            >
+                                                                ← Precedente
+                                                            </button>
+                                                            <span className="text-gray-300 text-sm">
+                                                                Pagina {paginaSessioni + 1} di {totalePagineSessioni}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => setPaginaSessioni(Math.min(totalePagineSessioni - 1, paginaSessioni + 1))}
+                                                                disabled={paginaSessioni >= totalePagineSessioni - 1}
+                                                                className="bg-cyan-600 text-white px-4 py-2 rounded-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-cyan-700"
+                                                            >
+                                                                Successiva →
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    </>
                                                     )}
                                                 </div>
                                             )}
@@ -1914,54 +1999,107 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                 }
                                             </button>
                                             {mostraCatture && (
-                                                <div className="p-4 pt-0 space-y-4">
-                                            {getCattureFiltrate().map(c => (
-                                                <div key={c.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                                                    <div className="flex justify-between mb-2">
-                                                        <div>
-                                                            <h4 className="text-white font-bold text-xl">{c.specie}</h4>
+                                                <div className="p-4 pt-0">
+                                                    <div className="space-y-3">
+                                            {getCatturePaginate().map(c => {
+                                                const isEspansa = cattureEspanse.has(c.id);
+                                                return (
+                                                <div key={c.id} className="bg-gray-900 rounded-lg border border-gray-700">
+                                                    <div
+                                                        onClick={() => toggleCatturaEspansa(c.id)}
+                                                        className="flex justify-between items-start p-4 cursor-pointer active:bg-gray-800"
+                                                    >
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h4 className="text-white font-bold text-xl">{c.specie}</h4>
+                                                                {isEspansa ? <ChevronUp className="text-cyan-400" width={20} height={20} /> : <ChevronDown className="text-cyan-400" width={20} height={20} />}
+                                                            </div>
                                                             <p className="text-gray-400 text-sm">{c.data} - {c.ora}</p>
+                                                            {c.meteo?.direzioneVento && (
+                                                                <p className="text-cyan-300 text-sm mt-1">
+                                                                    🌬️ {c.meteo.direzioneVento.split(' ')[0]}
+                                                                </p>
+                                                            )}
+
+                                                            {isEspansa && (
+                                                                <>
+                                                                <div className="mt-3 pt-3 border-t border-gray-700">
+                                                                    <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati cattura</h5>
+                                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                        {c.peso && <p className="text-gray-300"><span className="text-cyan-400">peso:</span> {(parseFloat(c.peso)/1000).toFixed(2)} kg</p>}
+                                                                        {c.lunghezza && <p className="text-gray-300"><span className="text-cyan-400">lunghezza:</span> {c.lunghezza} cm</p>}
+                                                                        {c.localita && <p className="text-gray-300"><span className="text-cyan-400">località:</span> {c.localita}</p>}
+                                                                        {c.esca && <p className="text-gray-300"><span className="text-cyan-400">esca:</span> {c.esca}</p>}
+                                                                        {c.latitudine && <p className="text-gray-300"><span className="text-cyan-400">lat:</span> {c.latitudine}</p>}
+                                                                        {c.longitudine && <p className="text-gray-300"><span className="text-cyan-400">long:</span> {c.longitudine}</p>}
+                                                                        {c.canna && <p className="text-gray-300"><span className="text-cyan-400">canna:</span> {c.canna}</p>}
+                                                                        {c.trave && <p className="text-gray-300"><span className="text-cyan-400">trave:</span> {c.trave}</p>}
+                                                                        {c.amo && <p className="text-gray-300"><span className="text-cyan-400">amo:</span> {c.amo}</p>}
+                                                                        {c.piombo && <p className="text-gray-300"><span className="text-cyan-400">piombo:</span> {c.piombo}</p>}
+                                                                    </div>
+                                                                    {c.note && <p className="text-gray-400 text-sm mt-2 italic"><span className="text-cyan-400">note:</span> {c.note}</p>}
+                                                                </div>
+
+                                                                {c.meteo && Object.values(c.meteo).some(Boolean) && (
+                                                                    <div className="mt-3 pt-3 border-t border-gray-700">
+                                                                        <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati meteo</h5>
+                                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                            {c.meteo.temperatura && <p className="text-gray-300"><span className="text-cyan-400">temp aria:</span> {c.meteo.temperatura}°C</p>}
+                                                                            {c.meteo.temperaturaAcqua && <p className="text-gray-300"><span className="text-cyan-400">temp acqua:</span> {c.meteo.temperaturaAcqua}°C</p>}
+                                                                            {c.meteo.pressione && <p className="text-gray-300"><span className="text-cyan-400">pressione:</span> {c.meteo.pressione} hPa</p>}
+                                                                            {c.meteo.vento && <p className="text-gray-300"><span className="text-cyan-400">vento:</span> {c.meteo.vento} nodi</p>}
+                                                                            {c.meteo.direzioneVento && <p className="text-gray-300 col-span-2"><span className="text-cyan-400">direzione:</span> {c.meteo.direzioneVento}</p>}
+                                                                            {c.meteo.condizioni && <p className="text-gray-300"><span className="text-cyan-400">condizioni:</span> {c.meteo.condizioni}</p>}
+                                                                            {c.meteo.faseLunare && <p className="text-gray-300"><span className="text-cyan-400">luna:</span> {c.meteo.faseLunare}</p>}
+                                                                            {c.meteo.altaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">alta marea:</span> {c.meteo.altaMareaOra}</p>}
+                                                                            {c.meteo.bassaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">bassa marea:</span> {c.meteo.bassaMareaOra}</p>}
+                                                                            {c.meteo.altezzaOnde && <p className="text-gray-300"><span className="text-cyan-400">altezza onde:</span> {c.meteo.altezzaOnde} cm</p>}
+                                                                            {c.meteo.frequenzaOnde && <p className="text-gray-300"><span className="text-cyan-400">frequenza onde:</span> {c.meteo.frequenzaOnde} sec</p>}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                </>
+                                                            )}
                                                         </div>
-                                                        <button onClick={() => setCatture(catture.filter(x => x.id !== c.id))} className="text-red-500"><Trash2 width={20} height={20} /></button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (window.confirm(`Cancellare la cattura di ${c.specie}?`)) {
+                                                                    setCatture(catture.filter(x => x.id !== c.id));
+                                                                }
+                                                            }}
+                                                            className="text-red-500 ml-3"
+                                                        >
+                                                            <Trash2 width={20} height={20} />
+                                                        </button>
                                                     </div>
-                                                    
-                                                    <div className="mb-3">
-                                                        <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati cattura</h5>
-                                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                                            {c.peso && <p className="text-gray-300"><span className="text-cyan-400">peso:</span> {(parseFloat(c.peso)/1000).toFixed(2)} kg</p>}
-                                                            {c.lunghezza && <p className="text-gray-300"><span className="text-cyan-400">lunghezza:</span> {c.lunghezza} cm</p>}
-                                                            {c.localita && <p className="text-gray-300"><span className="text-cyan-400">località:</span> {c.localita}</p>}
-                                                            {c.esca && <p className="text-gray-300"><span className="text-cyan-400">esca:</span> {c.esca}</p>}
-                                                            {c.latitudine && <p className="text-gray-300"><span className="text-cyan-400">lat:</span> {c.latitudine}</p>}
-                                                            {c.longitudine && <p className="text-gray-300"><span className="text-cyan-400">long:</span> {c.longitudine}</p>}
-                                                            {c.canna && <p className="text-gray-300"><span className="text-cyan-400">canna:</span> {c.canna}</p>}
-                                                            {c.trave && <p className="text-gray-300"><span className="text-cyan-400">trave:</span> {c.trave}</p>}
-                                                            {c.amo && <p className="text-gray-300"><span className="text-cyan-400">amo:</span> {c.amo}</p>}
-                                                            {c.piombo && <p className="text-gray-300"><span className="text-cyan-400">piombo:</span> {c.piombo}</p>}
-                                                        </div>
-                                                        {c.note && <p className="text-gray-400 text-sm mt-2 italic"><span className="text-cyan-400">note:</span> {c.note}</p>}
+                                                </div>
+                                                );
+                                            })}
                                                     </div>
 
-                                                    {c.meteo && Object.values(c.meteo).some(Boolean) && (
-                                                        <div>
-                                                            <h5 className="text-cyan-400 font-semibold mb-2 text-sm">dati meteo</h5>
-                                                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                                                {c.meteo.temperatura && <p className="text-gray-300"><span className="text-cyan-400">temp aria:</span> {c.meteo.temperatura}°C</p>}
-                                                                {c.meteo.temperaturaAcqua && <p className="text-gray-300"><span className="text-cyan-400">temp acqua:</span> {c.meteo.temperaturaAcqua}°C</p>}
-                                                                {c.meteo.pressione && <p className="text-gray-300"><span className="text-cyan-400">pressione:</span> {c.meteo.pressione} hPa</p>}
-                                                                {c.meteo.vento && <p className="text-gray-300"><span className="text-cyan-400">vento:</span> {c.meteo.vento} nodi</p>}
-                                                                {c.meteo.direzioneVento && <p className="text-gray-300 col-span-2"><span className="text-cyan-400">direzione:</span> {c.meteo.direzioneVento}</p>}
-                                                                {c.meteo.condizioni && <p className="text-gray-300"><span className="text-cyan-400">condizioni:</span> {c.meteo.condizioni}</p>}
-                                                                {c.meteo.faseLunare && <p className="text-gray-300"><span className="text-cyan-400">luna:</span> {c.meteo.faseLunare}</p>}
-                                                                {c.meteo.altaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">alta marea:</span> {c.meteo.altaMareaOra}</p>}
-                                                                {c.meteo.bassaMareaOra && <p className="text-gray-300"><span className="text-cyan-400">bassa marea:</span> {c.meteo.bassaMareaOra}</p>}
-                                                                {c.meteo.altezzaOnde && <p className="text-gray-300"><span className="text-cyan-400">altezza onde:</span> {c.meteo.altezzaOnde} cm</p>}
-                                                                {c.meteo.frequenzaOnde && <p className="text-gray-300"><span className="text-cyan-400">frequenza onde:</span> {c.meteo.frequenzaOnde} sec</p>}
-                                                            </div>
+                                                    {/* Paginazione Catture */}
+                                                    {totalePagineCatture > 1 && (
+                                                        <div className="flex items-center justify-center gap-3 mt-4">
+                                                            <button
+                                                                onClick={() => setPaginaCatture(Math.max(0, paginaCatture - 1))}
+                                                                disabled={paginaCatture === 0}
+                                                                className="bg-cyan-600 text-white px-4 py-2 rounded-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-cyan-700"
+                                                            >
+                                                                ← Precedente
+                                                            </button>
+                                                            <span className="text-gray-300 text-sm">
+                                                                Pagina {paginaCatture + 1} di {totalePagineCatture}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => setPaginaCatture(Math.min(totalePagineCatture - 1, paginaCatture + 1))}
+                                                                disabled={paginaCatture >= totalePagineCatture - 1}
+                                                                className="bg-cyan-600 text-white px-4 py-2 rounded-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed active:bg-cyan-700"
+                                                            >
+                                                                Successiva →
+                                                            </button>
                                                         </div>
                                                     )}
-                                                </div>
-                                            ))}
                                                 </div>
                                             )}
                                         </div>
