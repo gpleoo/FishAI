@@ -120,7 +120,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [escheMemorizzate, setEscheMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_esche');
-                    const escheDefault = ['Americano', 'Arenicola', 'Bibi', 'Canolicchio', 'Cefalo', 'Coreano', 'Gambero', 'Granachio', 'Muriddu', 'Seppia'];
+                    const escheDefault = ['Americano', 'Arenicola', 'Bibi', 'Canolicchio', 'Cefalo', 'Coreano', 'Gambero', 'Granchio', 'Muriddu', 'Seppia'];
                     const array = salvate ? JSON.parse(salvate) : escheDefault;
                     return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
@@ -232,6 +232,15 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(true); // Collassabile: gestione sessioni
             const [mostraCatture, setMostraCatture] = useState(true); // Collassabile: mostra catture
             const [mostraSplash, setMostraSplash] = useState(true); // Splash screen iniziale
+
+            // Stati collassabili per sezioni gestione
+            const [mostraLocalita, setMostraLocalita] = useState(false);
+            const [mostraSpecie, setMostraSpecie] = useState(false);
+            const [mostraEsche, setMostraEsche] = useState(false);
+            const [mostraCanne, setMostraCanne] = useState(false);
+            const [mostraTravi, setMostraTravi] = useState(false);
+            const [mostraAmi, setMostraAmi] = useState(false);
+            const [mostraPiombi, setMostraPiombi] = useState(false);
 
             // Stati per paginazione e viste espanse
             const [paginaCatture, setPaginaCatture] = useState(0);
@@ -686,6 +695,101 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 return affermazioni.some(parola => testo.includes(parola));
             };
 
+            // Sinonimi e varianti fonetiche per specie ed esche difficili
+            const sinonimiSpecie = {
+                'gronco': ['gronco', 'grongo', 'gronghi', 'bronco'],
+                'leccia stella': ['leccia stella', 'leccia', 'licia stella', 'letcia stella'],
+                'pesce serra': ['pesce serra', 'serra', 'pesci serra'],
+                'marmora': ['marmora', 'marmona', 'armora'],
+                'occhiata': ['occhiata', 'occhiatta', 'ochiata'],
+                'ombrina': ['ombrina', 'umbrina', 'ombina'],
+                'sughero': ['sughero', 'sugaro', 'subero']
+            };
+
+            const sinonimiEsche = {
+                'canolicchio': ['canolicchio', 'canolichio', 'cannolicchio', 'cannocchio', 'canolinchi'],
+                'muriddu': ['muriddu', 'muriddi', 'muriddù', 'muriddo', 'muridu'],
+                'arenicola': ['arenicola', 'arenicula', 'arenichola'],
+                'granchio': ['granchio', 'granciporro', 'grancio']
+            };
+
+            // Calcola similarità tra due stringhe (Levenshtein semplificato)
+            const calcolaSimilarita = (str1, str2) => {
+                str1 = str1.toLowerCase().trim();
+                str2 = str2.toLowerCase().trim();
+
+                if (str1 === str2) return 1.0;
+
+                // Controlla se una stringa contiene l'altra
+                if (str1.includes(str2) || str2.includes(str1)) return 0.8;
+
+                // Calcola distanza Levenshtein semplificata
+                const len1 = str1.length;
+                const len2 = str2.length;
+                const maxLen = Math.max(len1, len2);
+
+                if (maxLen === 0) return 1.0;
+
+                let matches = 0;
+                const range = Math.floor(Math.max(len1, len2) / 2) - 1;
+                const str1Matches = new Array(len1);
+                const str2Matches = new Array(len2);
+
+                for (let i = 0; i < len1; i++) {
+                    const start = Math.max(0, i - range);
+                    const end = Math.min(i + range + 1, len2);
+
+                    for (let j = start; j < end; j++) {
+                        if (str2Matches[j] || str1[i] !== str2[j]) continue;
+                        str1Matches[i] = true;
+                        str2Matches[j] = true;
+                        matches++;
+                        break;
+                    }
+                }
+
+                if (matches === 0) return 0;
+
+                return matches / maxLen;
+            };
+
+            // Trova corrispondenza migliore in lista con fuzzy matching e sinonimi
+            const trovaCorrispondenza = (testoRiconosciuto, lista, mapSinonimi = {}) => {
+                const testo = testoRiconosciuto.toLowerCase().trim();
+
+                // 1. Cerca corrispondenza esatta
+                const corrispondenzaEsatta = lista.find(item => item.toLowerCase() === testo);
+                if (corrispondenzaEsatta) return { trovato: corrispondenzaEsatta, confidenza: 1.0 };
+
+                // 2. Cerca nei sinonimi
+                for (const [chiave, sinonimi] of Object.entries(mapSinonimi)) {
+                    if (sinonimi.some(sin => testo.includes(sin.toLowerCase()) || sin.toLowerCase().includes(testo))) {
+                        const itemLista = lista.find(item => item.toLowerCase().includes(chiave.toLowerCase()));
+                        if (itemLista) return { trovato: itemLista, confidenza: 0.9 };
+                    }
+                }
+
+                // 3. Fuzzy matching con threshold di similarità
+                let miglioreMatch = null;
+                let miglioreScore = 0;
+
+                for (const item of lista) {
+                    const similarita = calcolaSimilarita(testo, item);
+
+                    // Se similarità > 0.7 (70%), considera come match valido
+                    if (similarita > miglioreScore && similarita >= 0.7) {
+                        miglioreScore = similarita;
+                        miglioreMatch = item;
+                    }
+                }
+
+                if (miglioreMatch) {
+                    return { trovato: miglioreMatch, confidenza: miglioreScore };
+                }
+
+                return null;
+            };
+
             // Macchina a stati conversazionale
             const gestisciStatoConversazione = async (stato, risposta = null, tentativoAttesa = 1) => {
                 try {
@@ -708,16 +812,15 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaSpecie);
                                     console.log('📋 Specie disponibili (ref):', specieMemorizzateVocaleRef.current);
 
-                                    // Validazione: usa ref per lista sempre aggiornata (fix bug specie appena salvata)
-                                    specieTrovata = specieMemorizzateVocaleRef.current.find(s =>
-                                        s.toLowerCase() === rispostaSpecie.toLowerCase()
-                                    );
+                                    // Validazione con fuzzy matching e sinonimi
+                                    const risultato = trovaCorrispondenza(rispostaSpecie, specieMemorizzateVocaleRef.current, sinonimiSpecie);
 
-                                    if (specieTrovata) {
+                                    if (risultato) {
+                                        specieTrovata = risultato.trovato;
                                         // Specie trovata! Compila e esci dal loop
                                         setNuovaCattura(prev => ({ ...prev, specie: specieTrovata }));
                                         datiCatturaVocaleRef.current.specie = specieTrovata;
-                                        console.log('✅ Specie compilata:', specieTrovata);
+                                        console.log(`✅ Specie compilata: ${specieTrovata} (confidenza: ${(risultato.confidenza * 100).toFixed(0)}%)`);
                                         await parla(`Specie registrata: ${specieTrovata}`);
                                         break; // Esci dal loop
                                     } else {
@@ -735,7 +838,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             }
 
                             setStatoConversazione('LUNGHEZZA');
-                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await new Promise(resolve => setTimeout(resolve, 400));
                             await gestisciStatoConversazione('LUNGHEZZA');
                             break;
 
@@ -751,7 +854,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             }
 
                             setStatoConversazione('ESCA');
-                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await new Promise(resolve => setTimeout(resolve, 400));
                             await gestisciStatoConversazione('ESCA');
                             break;
 
@@ -773,16 +876,15 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     console.log(`🎤 Tentativo ${tentativo} - Risposta riconosciuta:`, rispostaEsca);
                                     console.log('📋 Esche disponibili (ref):', escheMemorizzateVocaleRef.current);
 
-                                    // Validazione: usa ref per lista sempre aggiornata (fix bug esca appena salvata)
-                                    escaTrovata = escheMemorizzateVocaleRef.current.find(e =>
-                                        e.toLowerCase() === rispostaEsca.toLowerCase()
-                                    );
+                                    // Validazione con fuzzy matching e sinonimi
+                                    const risultato = trovaCorrispondenza(rispostaEsca, escheMemorizzateVocaleRef.current, sinonimiEsche);
 
-                                    if (escaTrovata) {
+                                    if (risultato) {
+                                        escaTrovata = risultato.trovato;
                                         // Esca trovata! Compila e esci dal loop
                                         setNuovaCattura(prev => ({ ...prev, esca: escaTrovata }));
                                         datiCatturaVocaleRef.current.esca = escaTrovata;
-                                        console.log('✅ Esca compilata:', escaTrovata);
+                                        console.log(`✅ Esca compilata: ${escaTrovata} (confidenza: ${(risultato.confidenza * 100).toFixed(0)}%)`);
                                         await parla(`Esca registrata: ${escaTrovata}`);
                                         break; // Esci dal loop
                                     } else {
@@ -800,7 +902,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             }
 
                             setStatoConversazione('CONFERMA_METEO');
-                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await new Promise(resolve => setTimeout(resolve, 400));
                             await gestisciStatoConversazione('CONFERMA_METEO');
                             break;
 
@@ -819,7 +921,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             }
 
                             setStatoConversazione('CONFERMA_REGISTRA');
-                            await new Promise(resolve => setTimeout(resolve, 800));
+                            await new Promise(resolve => setTimeout(resolve, 400));
                             await gestisciStatoConversazione('CONFERMA_REGISTRA');
                             break;
 
@@ -867,7 +969,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
                                 // Ricomincia conversazione (reset tentativi)
                                 setStatoConversazione('SPECIE');
-                                await new Promise(resolve => setTimeout(resolve, 800));
+                                await new Promise(resolve => setTimeout(resolve, 400));
                                 await gestisciStatoConversazione('SPECIE');
                             } else {
                                 // Comando non riconosciuto, continua ad ascoltare con contatore incrementato
@@ -1615,14 +1717,25 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
                         <Section icon={Wrench} title="gestione" isActive={activeSection === 'attrezzature'} onToggle={() => setActiveSection(activeSection === 'attrezzature' ? null : 'attrezzature')}>
                             <div className="space-y-6">
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">località</h3>
-                                        <button onClick={aggiungiLocalita} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovaLocalita} onChange={(e) => setNuovaLocalita(e.target.value)} placeholder="es: molo di fiumicino..." 
-                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {[...localitaMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((l, i) => (
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraLocalita(!mostraLocalita)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">📍 località</h3>
+                                        {mostraLocalita ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraLocalita && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiLocalita} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovaLocalita} onChange={(e) => setNuovaLocalita(e.target.value)} placeholder="es: molo di fiumicino..."
+                                                className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                            {[...localitaMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((l, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
                                             {editandoLocalita === l ? (
                                                 <input
@@ -1647,11 +1760,24 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             </div>
                                         </div>
                                     ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">specie</h3>
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraSpecie(!mostraSpecie)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">🐟 specie</h3>
+                                        {mostraSpecie ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraSpecie && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
                                         <button onClick={aggiungiSpecie} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
                                     </div>
                                     <input type="text" value={nuovaSpecie} onChange={(e) => setNuovaSpecie(e.target.value)} placeholder="es: spigola, orata..."
@@ -1681,14 +1807,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             </div>
                                         </div>
                                     ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">esche</h3>
-                                        <button onClick={aggiungiEsca} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovaEsca} onChange={(e) => setNuovaEsca(e.target.value)} placeholder="es: minnow, sardina..."
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraEsche(!mostraEsche)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">🪱 esche</h3>
+                                        {mostraEsche ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraEsche && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiEsca} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovaEsca} onChange={(e) => setNuovaEsca(e.target.value)} placeholder="es: minnow, sardina..."
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                     {[...escheMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((e, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
@@ -1715,14 +1854,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             </div>
                                         </div>
                                     ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">canne</h3>
-                                        <button onClick={aggiungiCanna} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovaCanna} onChange={(e) => setNuovaCanna(e.target.value)} placeholder="es: bolognese 6m..." 
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraCanne(!mostraCanne)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">🎣 canne</h3>
+                                        {mostraCanne ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraCanne && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiCanna} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovaCanna} onChange={(e) => setNuovaCanna(e.target.value)} placeholder="es: bolognese 6m..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                     {[...canneMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((c, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
@@ -1730,29 +1882,55 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             <button onClick={() => setCanneMemorizzate(canneMemorizzate.filter(x => x !== c))} className="text-red-500"><Trash2 width={16} height={16} /></button>
                                         </div>
                                     ))}
-                                </div>
-
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">travi</h3>
-                                        <button onClick={aggiungiTrave} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovoTrave} onChange={(e) => setNuovoTrave(e.target.value)} placeholder="es: 0.20mm..." 
-                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {[...traviMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((t, i) => (
-                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                            <span className="text-gray-300">{t}</span>
-                                            <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500"><Trash2 width={16} height={16} /></button>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
 
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">ami</h3>
-                                        <button onClick={aggiungiAmo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovoAmo} onChange={(e) => setNuovoAmo(e.target.value)} placeholder="es: n.8..." 
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraTravi(!mostraTravi)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">🧵 travi</h3>
+                                        {mostraTravi ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraTravi && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiTrave} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovoTrave} onChange={(e) => setNuovoTrave(e.target.value)} placeholder="es: 0.20mm..."
+                                                className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                            {[...traviMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((t, i) => (
+                                                <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                                    <span className="text-gray-300">{t}</span>
+                                                    <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraAmi(!mostraAmi)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">🪝 ami</h3>
+                                        {mostraAmi ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraAmi && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiAmo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovoAmo} onChange={(e) => setNuovoAmo(e.target.value)} placeholder="es: n.8..." 
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                     {[...amiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((a, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
@@ -1760,21 +1938,36 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             <button onClick={() => setAmiMemorizzati(amiMemorizzati.filter(x => x !== a))} className="text-red-500"><Trash2 width={16} height={16} /></button>
                                         </div>
                                     ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-lg font-bold text-cyan-400">piombi</h3>
-                                        <button onClick={aggiungiPiombo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
-                                    </div>
-                                    <input type="text" value={nuovoPiombo} onChange={(e) => setNuovoPiombo(e.target.value)} placeholder="es: 50g..." 
-                                        className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
-                                    {[...piombiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((p, i) => (
-                                        <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                            <span className="text-gray-300">{p}</span>
-                                            <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                                    <button
+                                        onClick={() => setMostraPiombi(!mostraPiombi)}
+                                        className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                    >
+                                        <h3 className="text-lg font-bold text-cyan-400">⚓ piombi</h3>
+                                        {mostraPiombi ?
+                                            <ChevronUp className="text-cyan-400" width={20} height={20} /> :
+                                            <ChevronDown className="text-cyan-400" width={20} height={20} />
+                                        }
+                                    </button>
+                                    {mostraPiombi && (
+                                        <div className="p-4 pt-0">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <button onClick={aggiungiPiombo} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">+ aggiungi</button>
+                                            </div>
+                                            <input type="text" value={nuovoPiombo} onChange={(e) => setNuovoPiombo(e.target.value)} placeholder="es: 50g..."
+                                                className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
+                                            {[...piombiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((p, i) => (
+                                                <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
+                                                    <span className="text-gray-300">{p}</span>
+                                                    <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </Section>
