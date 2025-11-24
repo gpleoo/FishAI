@@ -109,21 +109,23 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [specieMemorizzate, setSpecieMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_specie');
-                    const array = salvate ? JSON.parse(salvate) : [];
+                    const specieDefault = ['Cefalo', 'Gronco', 'Leccia stella', 'Marmora', 'Occhiata', 'Ombrina', 'Opa', 'Orata', 'Pesce serra', 'Sarago', 'Spigola', 'Sughero'];
+                    const array = salvate ? JSON.parse(salvate) : specieDefault;
                     return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento specie:', e);
-                    return [];
+                    return ['Cefalo', 'Gronco', 'Leccia stella', 'Marmora', 'Occhiata', 'Ombrina', 'Opa', 'Orata', 'Pesce serra', 'Sarago', 'Spigola', 'Sughero'];
                 }
             });
             const [escheMemorizzate, setEscheMemorizzate] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_esche');
-                    const array = salvate ? JSON.parse(salvate) : [];
+                    const escheDefault = ['Americano', 'Arenicola', 'Bibi', 'Canolicchio', 'Cefalo', 'Coreano', 'Gambero', 'Granachio', 'Muriddu', 'Seppia'];
+                    const array = salvate ? JSON.parse(salvate) : escheDefault;
                     return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento esche:', e);
-                    return [];
+                    return ['Americano', 'Arenicola', 'Bibi', 'Canolicchio', 'Cefalo', 'Coreano', 'Gambero', 'Granachio', 'Muriddu', 'Seppia'];
                 }
             });
             const [localitaMemorizzate, setLocalitaMemorizzate] = useState(() => {
@@ -169,21 +171,23 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [amiMemorizzati, setAmiMemorizzati] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_ami');
-                    const array = salvate ? JSON.parse(salvate) : [];
+                    const amiDefault = ['1/0', '2/0', '2', '4', '6', '8', '10'];
+                    const array = salvate ? JSON.parse(salvate) : amiDefault;
                     return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento ami:', e);
-                    return [];
+                    return ['1/0', '2/0', '2', '4', '6', '8', '10'];
                 }
             });
             const [piombiMemorizzati, setPiombiMemorizzati] = useState(() => {
                 try {
                     const salvate = localStorage.getItem('diarioPesca_piombi');
-                    const array = salvate ? JSON.parse(salvate) : [];
+                    const piombiDefault = ['Idropiramide 100', 'Idropiramide 125', 'Idropiramide 150', 'Idropiramide 175', 'Ogiva 50', 'Ogiva 75', 'Ogiva 100', 'Ogiva 125', 'Ogiva 150', 'Ogiva 175', 'Palla 100', 'Palla 125', 'Palla 150', 'Palla 175', 'Sporten 100', 'Sporten 125', 'Sporten 150', 'Sporten 175'];
+                    const array = salvate ? JSON.parse(salvate) : piombiDefault;
                     return array.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' }));
                 } catch (e) {
                     console.error('Errore caricamento piombi:', e);
-                    return [];
+                    return ['Idropiramide 100', 'Idropiramide 125', 'Idropiramide 150', 'Idropiramide 175', 'Ogiva 50', 'Ogiva 75', 'Ogiva 100', 'Ogiva 125', 'Ogiva 150', 'Ogiva 175', 'Palla 100', 'Palla 125', 'Palla 150', 'Palla 175', 'Sporten 100', 'Sporten 125', 'Sporten 150', 'Sporten 175'];
                 }
             });
             const [sessioneAttiva, setSessioneAttiva] = useState(() => {
@@ -316,7 +320,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 altezzaOnde: '', frequenzaOnde: ''
             });
 
-            const [filtri, setFiltri] = useState({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte' });
+            const [filtri, setFiltri] = useState({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte', temperatura: 'tutte', pressione: 'tutte', vento: 'tutti', faseLunare: 'tutte' });
 
             const ventiRosaDeiVenti = [
                 'N (Tramontana - 4°/1° Quadrante - 0°)',
@@ -1101,7 +1105,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                        (filtri.specie === 'tutte' || c.specie === filtri.specie) &&
                        (filtri.direzioneVento === 'tutte' || c.meteo?.direzioneVento === filtri.direzioneVento) &&
                        (filtri.condizioni === 'tutte' || c.meteo?.condizioni === filtri.condizioni) &&
-                       (filtri.localita === 'tutte' || c.localita === filtri.localita);
+                       (filtri.localita === 'tutte' || c.localita === filtri.localita) &&
+                       (filtri.temperatura === 'tutte' || c.meteo?.temperatura === filtri.temperatura) &&
+                       (filtri.pressione === 'tutte' || c.meteo?.pressione === filtri.pressione) &&
+                       (filtri.vento === 'tutti' || c.meteo?.vento === filtri.vento) &&
+                       (filtri.faseLunare === 'tutte' || c.meteo?.faseLunare === filtri.faseLunare);
             });
 
             // Filtra sessioni in base ai filtri attivi (anno, mese, località + catture corrispondenti)
@@ -1118,7 +1126,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 // Se non ci sono filtri su specie/vento/meteo, la sessione passa
                 const haFiltriCatture = filtri.specie !== 'tutte' ||
                                        filtri.direzioneVento !== 'tutte' ||
-                                       filtri.condizioni !== 'tutte';
+                                       filtri.condizioni !== 'tutte' ||
+                                       filtri.temperatura !== 'tutte' ||
+                                       filtri.pressione !== 'tutte' ||
+                                       filtri.vento !== 'tutti' ||
+                                       filtri.faseLunare !== 'tutte';
 
                 if (!haFiltriCatture) return true;
 
@@ -1131,7 +1143,11 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 return cattureSessione.some(c => {
                     return (filtri.specie === 'tutte' || c.specie === filtri.specie) &&
                            (filtri.direzioneVento === 'tutte' || c.meteo?.direzioneVento === filtri.direzioneVento) &&
-                           (filtri.condizioni === 'tutte' || c.meteo?.condizioni === filtri.condizioni);
+                           (filtri.condizioni === 'tutte' || c.meteo?.condizioni === filtri.condizioni) &&
+                           (filtri.temperatura === 'tutte' || c.meteo?.temperatura === filtri.temperatura) &&
+                           (filtri.pressione === 'tutte' || c.meteo?.pressione === filtri.pressione) &&
+                           (filtri.vento === 'tutti' || c.meteo?.vento === filtri.vento) &&
+                           (filtri.faseLunare === 'tutte' || c.meteo?.faseLunare === filtri.faseLunare);
                 });
             });
 
@@ -1952,9 +1968,41 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                     {condizioniMeteo.map(c => <option key={c} value={c}>{c}</option>)}
                                                 </select>
                                             </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">temperatura</label>
+                                                <select value={filtri.temperatura} onChange={(e) => setFiltri(p => ({...p, temperatura: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le temperature</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.temperatura).filter(Boolean))].sort().map(t => <option key={t} value={t}>{t}°C</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">pressione</label>
+                                                <select value={filtri.pressione} onChange={(e) => setFiltri(p => ({...p, pressione: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le pressioni</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.pressione).filter(Boolean))].sort().map(p => <option key={p} value={p}>{p} hPa</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">intensità vento</label>
+                                                <select value={filtri.vento} onChange={(e) => setFiltri(p => ({...p, vento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutte le intensità</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.vento).filter(Boolean))].sort().map(v => <option key={v} value={v}>{v} km/h</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">fase lunare</label>
+                                                <select value={filtri.faseLunare} onChange={(e) => setFiltri(p => ({...p, faseLunare: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le fasi</option>
+                                                    {fasiLunari.map(f => <option key={f} value={f}>{f}</option>)}
+                                                </select>
+                                            </div>
                                         </div>
 
-                                        <button onClick={() => setFiltri({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte' })}
+                                        <button onClick={() => setFiltri({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte', temperatura: 'tutte', pressione: 'tutte', vento: 'tutti', faseLunare: 'tutte' })}
                                             className="w-full mt-4 bg-red-600 text-white py-2 rounded-lg font-bold">
                                             reset filtri
                                         </button>
