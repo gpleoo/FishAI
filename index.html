@@ -1304,7 +1304,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             // Aggiungi marker per ogni sessione VALIDA con offset se necessario
                             let markersAggiunti = 0;
                             Object.values(gruppiCoordinate).forEach(gruppo => {
-                                const offsetRadialeGradi = 0.0008; // ~90 metri di offset
+                                const offsetRadialeGradi = 0.0003; // ~30 metri di offset
 
                                 gruppo.forEach((sessione, indexGruppo) => {
                                     const lat = parseFloat(sessione.latitudine);
