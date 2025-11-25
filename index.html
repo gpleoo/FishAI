@@ -246,6 +246,9 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [mostraFiltri, setMostraFiltri] = useState(true);
             const [mostraMappa, setMostraMappa] = useState(true);
 
+            // Stato collassabile per sessione di pesca
+            const [mostraSessionePesca, setMostraSessionePesca] = useState(false);
+
             // Stati per paginazione e viste espanse
             const [paginaCatture, setPaginaCatture] = useState(0);
             const [paginaSessioni, setPaginaSessioni] = useState(0);
@@ -1641,11 +1644,22 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             {catture.length > 0 && <p className="text-cyan-400 text-sm mt-2">{catture.length} catture salvate</p>}
                         </div>
 
-                        <div className="mb-6 p-6 bg-gray-900 border-2 border-cyan-600 rounded-xl">
-                            <h2 className="text-2xl font-bold text-cyan-400 mb-4 text-center">sessione di pesca</h2>
-                            {!sessioneAttiva ? (
-                                <div>
-                                    <p className="text-yellow-400 text-sm mb-4 text-center">obbligatoria per registrare catture</p>
+                        <div className="mb-6 bg-gray-900 border-2 border-cyan-600 rounded-xl">
+                            <button
+                                onClick={() => setMostraSessionePesca(!mostraSessionePesca)}
+                                className="w-full flex items-center justify-between p-6 active:bg-gray-800"
+                            >
+                                <h2 className="text-2xl font-bold text-cyan-400">🎣 sessione di pesca</h2>
+                                {mostraSessionePesca ?
+                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                }
+                            </button>
+                            {mostraSessionePesca && (
+                                <div className="p-6 pt-0">
+                                    {!sessioneAttiva ? (
+                                        <div>
+                                            <p className="text-yellow-400 text-sm mb-4 text-center">obbligatoria per registrare catture</p>
                                     
                                     {localitaMemorizzate.length > 0 && (
                                         <div className="mb-4 p-3 bg-blue-900/30 border border-blue-500 rounded-lg">
@@ -1693,6 +1707,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                         <p className="text-gray-400 text-xs text-center">{datiSessione.latitudine}, {datiSessione.longitudine}</p>
                                     </div>
                                     <button onClick={terminaSessione} className="w-full bg-red-600 text-white py-3 rounded-lg font-bold">termina sessione</button>
+                                </div>
+                            )}
                                 </div>
                             )}
                         </div>
