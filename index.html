@@ -265,6 +265,14 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [valoreEditSpecie, setValoreEditSpecie] = useState('');
             const [editandoEsca, setEditandoEsca] = useState(null);
             const [valoreEditEsca, setValoreEditEsca] = useState('');
+            const [editandoCanna, setEditandoCanna] = useState(null);
+            const [valoreEditCanna, setValoreEditCanna] = useState('');
+            const [editandoTrave, setEditandoTrave] = useState(null);
+            const [valoreEditTrave, setValoreEditTrave] = useState('');
+            const [editandoAmo, setEditandoAmo] = useState(null);
+            const [valoreEditAmo, setValoreEditAmo] = useState('');
+            const [editandoPiombo, setEditandoPiombo] = useState(null);
+            const [valoreEditPiombo, setValoreEditPiombo] = useState('');
 
             // Stati Assistente Vocale
             const [assistenteVocaleAttivo, setAssistenteVocaleAttivo] = useState(false);
@@ -572,6 +580,66 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 const nuoveEsche = escheMemorizzate.map(e => e === vecchioNome ? nuovoNomeTrim : e);
                 setEscheMemorizzate(nuoveEsche.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
                 setEditandoEsca(null);
+            };
+
+            const modificaCanna = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (canneMemorizzate.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questa canna esiste già!');
+                    return;
+                }
+                const nuoveCanne = canneMemorizzate.map(c => c === vecchioNome ? nuovoNomeTrim : c);
+                setCanneMemorizzate(nuoveCanne.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
+                setEditandoCanna(null);
+            };
+
+            const modificaTrave = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (traviMemorizzate.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questo trave esiste già!');
+                    return;
+                }
+                const nuoviTravi = traviMemorizzate.map(t => t === vecchioNome ? nuovoNomeTrim : t);
+                setTraviMemorizzate(nuoviTravi.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
+                setEditandoTrave(null);
+            };
+
+            const modificaAmo = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (amiMemorizzati.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questo amo esiste già!');
+                    return;
+                }
+                const nuoviAmi = amiMemorizzati.map(a => a === vecchioNome ? nuovoNomeTrim : a);
+                setAmiMemorizzati(nuoviAmi.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
+                setEditandoAmo(null);
+            };
+
+            const modificaPiombo = (vecchioNome, nuovoNome) => {
+                if (!nuovoNome || !nuovoNome.trim()) {
+                    alert('Il nome non può essere vuoto!');
+                    return;
+                }
+                const nuovoNomeTrim = nuovoNome.trim();
+                if (piombiMemorizzati.includes(nuovoNomeTrim) && nuovoNomeTrim !== vecchioNome) {
+                    alert('Questo piombo esiste già!');
+                    return;
+                }
+                const nuoviPiombi = piombiMemorizzati.map(p => p === vecchioNome ? nuovoNomeTrim : p);
+                setPiombiMemorizzati(nuoviPiombi.sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })));
+                setEditandoPiombo(null);
             };
 
             // ======== FUNZIONI ASSISTENTE VOCALE ========
@@ -1906,8 +1974,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                     {[...canneMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((c, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                            <span className="text-gray-300">{c}</span>
-                                            <button onClick={() => setCanneMemorizzate(canneMemorizzate.filter(x => x !== c))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                            {editandoCanna === c ? (
+                                                <input
+                                                    type="text"
+                                                    value={valoreEditCanna}
+                                                    onChange={(ev) => setValoreEditCanna(ev.target.value)}
+                                                    onBlur={() => { modificaCanna(c, valoreEditCanna); setEditandoCanna(null); }}
+                                                    onKeyPress={(ev) => { if (ev.key === 'Enter') { modificaCanna(c, valoreEditCanna); setEditandoCanna(null); }}}
+                                                    autoFocus
+                                                    className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                />
+                                            ) : (
+                                                <span className="text-gray-300 flex-1">{c}</span>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => { setEditandoCanna(c); setValoreEditCanna(c); }} className="text-blue-500 active:text-blue-400">
+                                                    <Edit width={16} height={16} />
+                                                </button>
+                                                <button onClick={() => setCanneMemorizzate(canneMemorizzate.filter(x => x !== c))} className="text-red-500 active:text-red-400">
+                                                    <Trash2 width={16} height={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                         </div>
@@ -1934,8 +2021,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                 className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                             {[...traviMemorizzate].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((t, i) => (
                                                 <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                                    <span className="text-gray-300">{t}</span>
-                                                    <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                                    {editandoTrave === t ? (
+                                                        <input
+                                                            type="text"
+                                                            value={valoreEditTrave}
+                                                            onChange={(ev) => setValoreEditTrave(ev.target.value)}
+                                                            onBlur={() => { modificaTrave(t, valoreEditTrave); setEditandoTrave(null); }}
+                                                            onKeyPress={(ev) => { if (ev.key === 'Enter') { modificaTrave(t, valoreEditTrave); setEditandoTrave(null); }}}
+                                                            autoFocus
+                                                            className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-gray-300 flex-1">{t}</span>
+                                                    )}
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => { setEditandoTrave(t); setValoreEditTrave(t); }} className="text-blue-500 active:text-blue-400">
+                                                            <Edit width={16} height={16} />
+                                                        </button>
+                                                        <button onClick={() => setTraviMemorizzate(traviMemorizzate.filter(x => x !== t))} className="text-red-500 active:text-red-400">
+                                                            <Trash2 width={16} height={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -1962,8 +2068,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                         className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                     {[...amiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((a, i) => (
                                         <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                            <span className="text-gray-300">{a}</span>
-                                            <button onClick={() => setAmiMemorizzati(amiMemorizzati.filter(x => x !== a))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                            {editandoAmo === a ? (
+                                                <input
+                                                    type="text"
+                                                    value={valoreEditAmo}
+                                                    onChange={(ev) => setValoreEditAmo(ev.target.value)}
+                                                    onBlur={() => { modificaAmo(a, valoreEditAmo); setEditandoAmo(null); }}
+                                                    onKeyPress={(ev) => { if (ev.key === 'Enter') { modificaAmo(a, valoreEditAmo); setEditandoAmo(null); }}}
+                                                    autoFocus
+                                                    className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                />
+                                            ) : (
+                                                <span className="text-gray-300 flex-1">{a}</span>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button onClick={() => { setEditandoAmo(a); setValoreEditAmo(a); }} className="text-blue-500 active:text-blue-400">
+                                                    <Edit width={16} height={16} />
+                                                </button>
+                                                <button onClick={() => setAmiMemorizzati(amiMemorizzati.filter(x => x !== a))} className="text-red-500 active:text-red-400">
+                                                    <Trash2 width={16} height={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                         </div>
@@ -1990,8 +2115,27 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                 className="w-full mb-3 bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-2 text-white" />
                                             {[...piombiMemorizzati].sort((a, b) => a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })).map((p, i) => (
                                                 <div key={i} className="flex justify-between items-center bg-gray-900 rounded px-3 py-2 mb-2">
-                                                    <span className="text-gray-300">{p}</span>
-                                                    <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500"><Trash2 width={16} height={16} /></button>
+                                                    {editandoPiombo === p ? (
+                                                        <input
+                                                            type="text"
+                                                            value={valoreEditPiombo}
+                                                            onChange={(ev) => setValoreEditPiombo(ev.target.value)}
+                                                            onBlur={() => { modificaPiombo(p, valoreEditPiombo); setEditandoPiombo(null); }}
+                                                            onKeyPress={(ev) => { if (ev.key === 'Enter') { modificaPiombo(p, valoreEditPiombo); setEditandoPiombo(null); }}}
+                                                            autoFocus
+                                                            className="flex-1 bg-gray-800 border border-cyan-500 rounded px-2 py-1 text-white mr-2"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-gray-300 flex-1">{p}</span>
+                                                    )}
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => { setEditandoPiombo(p); setValoreEditPiombo(p); }} className="text-blue-500 active:text-blue-400">
+                                                            <Edit width={16} height={16} />
+                                                        </button>
+                                                        <button onClick={() => setPiombiMemorizzati(piombiMemorizzati.filter(x => x !== p))} className="text-red-500 active:text-red-400">
+                                                            <Trash2 width={16} height={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
