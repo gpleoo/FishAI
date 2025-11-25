@@ -242,6 +242,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [mostraAmi, setMostraAmi] = useState(false);
             const [mostraPiombi, setMostraPiombi] = useState(false);
 
+            // Stati collassabili per filtri e mappa
+            const [mostraFiltri, setMostraFiltri] = useState(true);
+            const [mostraMappa, setMostraMappa] = useState(true);
+
             // Stati per paginazione e viste espanse
             const [paginaCatture, setPaginaCatture] = useState(0);
             const [paginaSessioni, setPaginaSessioni] = useState(0);
@@ -953,15 +957,39 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             setMessaggioVocale(`💬 Dì "nuova cattura" per registrare un\'altra cattura (tentativo ${tentativoAttesa}/${MAX_TENTATIVI_ATTESA})`);
                             const comandoRicevuto = await ascolta();
 
-                            // Riconosce varianti del comando "nuova cattura"
-                            if (comandoRicevuto &&
-                                (comandoRicevuto.includes('nuova cattura') ||
-                                 comandoRicevuto.includes('nuova') ||
-                                 comandoRicevuto.includes('cattura') ||
-                                 comandoRicevuto.includes('ancora') ||
-                                 comandoRicevuto.includes('un\'altra'))) {
+                            // Riconosce varianti del comando "nuova cattura" (fuzzy matching migliorato)
+                            const riconosciComando = (testo) => {
+                                if (!testo) return false;
+                                const testoLower = testo.toLowerCase().trim();
 
-                                console.log('✅ Comando "nuova cattura" riconosciuto');
+                                // Varianti esatte prioritarie
+                                const variantiEsatte = [
+                                    'nuova cattura',
+                                    'cattura nuova',
+                                    'altra cattura',
+                                    'registra cattura',
+                                    'ancora una',
+                                    'un altra',
+                                    'continua',
+                                    'si',
+                                    'sì',
+                                    'avanti'
+                                ];
+
+                                if (variantiEsatte.some(v => testoLower.includes(v))) return true;
+
+                                // Fuzzy matching: presenza di parole chiave (threshold più basso)
+                                const paroleChiave = ['nuova', 'cattura', 'ancora', 'altra', 'registra', 'continua'];
+                                const parolePresenti = paroleChiave.filter(p => testoLower.includes(p)).length;
+
+                                // Se almeno 1 parola chiave è presente, considera valido
+                                if (parolePresenti >= 1) return true;
+
+                                return false;
+                            };
+
+                            if (riconosciComando(comandoRicevuto)) {
+                                console.log('✅ Comando "nuova cattura" riconosciuto:', comandoRicevuto);
                                 await parla('Ok, nuova cattura');
 
                                 // Reset ref per nuova cattura
@@ -973,7 +1001,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 await gestisciStatoConversazione('SPECIE');
                             } else {
                                 // Comando non riconosciuto, continua ad ascoltare con contatore incrementato
-                                console.log(`⚠️ Comando non riconosciuto, resto in attesa (tentativo ${tentativoAttesa}/${MAX_TENTATIVI_ATTESA})`);
+                                console.log(`⚠️ Comando non riconosciuto: "${comandoRicevuto}", resto in attesa (tentativo ${tentativoAttesa}/${MAX_TENTATIVI_ATTESA})`);
                                 await new Promise(resolve => setTimeout(resolve, 1000));
                                 await gestisciStatoConversazione('IN_ATTESA_COMANDO', null, tentativoAttesa + 1);
                             }
@@ -1978,23 +2006,38 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             ) : (
                                 <>
                                     {sessioniCompletate.length > 0 && (
-                                        <div className="mb-6">
-                                            <h3 className="text-cyan-400 font-bold text-center mb-2 text-xl">
-                                                🗺️ mappa sessioni di pesca
-                                            </h3>
-                                            <p className="text-gray-400 text-center text-sm mb-2">
-                                                {sessioniCompletate.length} {sessioniCompletate.length === 1 ? 'sessione registrata' : 'sessioni registrate'}
-                                            </p>
-                                            <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-3 mb-3 text-center">
-                                                <p className="text-blue-400 text-xs">
-                                                    💡 Apri la console del browser (F12) per vedere i dettagli del caricamento
-                                                </p>
-                                            </div>
-                                            <div 
-                                                id="map-container" 
-                                                className="w-full h-96 rounded-lg border-2 border-cyan-500"
-                                                style={{minHeight: '400px'}}
-                                            ></div>
+                                        <div className="mb-6 bg-gray-800 rounded-lg border-2 border-green-500">
+                                            <button
+                                                onClick={() => setMostraMappa(!mostraMappa)}
+                                                className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                            >
+                                                <div className="flex-1">
+                                                    <h3 className="text-cyan-400 font-bold text-center text-xl">
+                                                        🗺️ mappa sessioni di pesca
+                                                    </h3>
+                                                    <p className="text-gray-400 text-center text-sm mt-1">
+                                                        {sessioniCompletate.length} {sessioniCompletate.length === 1 ? 'sessione registrata' : 'sessioni registrate'}
+                                                    </p>
+                                                </div>
+                                                {mostraMappa ?
+                                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                                }
+                                            </button>
+                                            {mostraMappa && (
+                                                <div className="p-4 pt-0">
+                                                    <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-3 mb-3 text-center">
+                                                        <p className="text-blue-400 text-xs">
+                                                            💡 Apri la console del browser (F12) per vedere i dettagli del caricamento
+                                                        </p>
+                                                    </div>
+                                                    <div
+                                                        id="map-container"
+                                                        className="w-full h-96 rounded-lg border-2 border-cyan-500"
+                                                        style={{minHeight: '400px'}}
+                                                    ></div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     
@@ -2099,10 +2142,20 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                         </div>
                                     )}
                                     
-                                    <div className="bg-gray-800 rounded-lg p-4 border-2 border-purple-500 mb-6">
-                                        <h3 className="text-purple-400 font-bold mb-4 text-center">filtri ricerca</h3>
-                                        
-                                        <div className="space-y-4">
+                                    <div className="bg-gray-800 rounded-lg border-2 border-purple-500 mb-6">
+                                        <button
+                                            onClick={() => setMostraFiltri(!mostraFiltri)}
+                                            className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                        >
+                                            <h3 className="text-purple-400 font-bold text-xl">🔍 filtri ricerca</h3>
+                                            {mostraFiltri ?
+                                                <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                            }
+                                        </button>
+                                        {mostraFiltri && (
+                                            <div className="p-4 pt-0">
+                                                <div className="space-y-4">
                                             <div>
                                                 <label className="block text-cyan-400 text-sm font-semibold mb-2">anno</label>
                                                 <select value={filtri.anno} onChange={(e) => setFiltri(p => ({...p, anno: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
@@ -2199,6 +2252,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             className="w-full mt-4 bg-red-600 text-white py-2 rounded-lg font-bold">
                                             reset filtri
                                         </button>
+                                                </div>
+                                            )}
                                     </div>
 
                                     <button onClick={applicaFiltri} className="w-full mb-6 bg-purple-600 text-white py-3 rounded-lg font-bold">mostra registro</button>
