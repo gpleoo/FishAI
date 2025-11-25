@@ -228,7 +228,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             });
             
             const [datiMeteoConfermati, setDatiMeteoConfermati] = useState(null);
-            const [mostraRegistro, setMostraRegistro] = useState(false);
+            const [mostraRegistro, setMostraRegistro] = useState(true); // Sempre visibile ora
             const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(true); // Collassabile: gestione sessioni
             const [mostraCatture, setMostraCatture] = useState(true); // Collassabile: mostra catture
             const [mostraSplash, setMostraSplash] = useState(true); // Splash screen iniziale
@@ -2005,6 +2005,120 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 <p className="text-gray-400 text-center py-8">nessuna cattura registrata</p>
                             ) : (
                                 <>
+                                    <div className="bg-gray-800 rounded-lg border-2 border-purple-500 mb-6">
+                                        <button
+                                            onClick={() => setMostraFiltri(!mostraFiltri)}
+                                            className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                        >
+                                            <h3 className="text-purple-400 font-bold text-xl">🔍 filtri ricerca</h3>
+                                            {mostraFiltri ?
+                                                <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                            }
+                                        </button>
+                                        {mostraFiltri && (
+                                            <div className="p-4 pt-0">
+                                                <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">anno</label>
+                                                <select value={filtri.anno} onChange={(e) => setFiltri(p => ({...p, anno: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutti gli anni</option>
+                                                    {getAnniDisponibili().map(a => <option key={a} value={a}>{a}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">mese</label>
+                                                <select value={filtri.mese} onChange={(e) => setFiltri(p => ({...p, mese: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutti i mesi</option>
+                                                    <option value="01">gennaio</option>
+                                                    <option value="02">febbraio</option>
+                                                    <option value="03">marzo</option>
+                                                    <option value="04">aprile</option>
+                                                    <option value="05">maggio</option>
+                                                    <option value="06">giugno</option>
+                                                    <option value="07">luglio</option>
+                                                    <option value="08">agosto</option>
+                                                    <option value="09">settembre</option>
+                                                    <option value="10">ottobre</option>
+                                                    <option value="11">novembre</option>
+                                                    <option value="12">dicembre</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">specie</label>
+                                                <select value={filtri.specie} onChange={(e) => setFiltri(p => ({...p, specie: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le specie</option>
+                                                    {[...new Set(catture.map(c => c.specie).filter(Boolean))].sort().map(s => <option key={s} value={s}>{s}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">località</label>
+                                                <select value={filtri.localita} onChange={(e) => setFiltri(p => ({...p, localita: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le località</option>
+                                                    {[...new Set(catture.map(c => c.localita).filter(Boolean))].sort().map(l => <option key={l} value={l}>{l}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">direzione vento</label>
+                                                <select value={filtri.direzioneVento} onChange={(e) => setFiltri(p => ({...p, direzioneVento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le direzioni</option>
+                                                    {ventiRosaDeiVenti.map(v => <option key={v} value={v}>{v}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">condizioni meteo</label>
+                                                <select value={filtri.condizioni} onChange={(e) => setFiltri(p => ({...p, condizioni: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le condizioni</option>
+                                                    {condizioniMeteo.map(c => <option key={c} value={c}>{c}</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">temperatura</label>
+                                                <select value={filtri.temperatura} onChange={(e) => setFiltri(p => ({...p, temperatura: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le temperature</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.temperatura).filter(Boolean))].sort().map(t => <option key={t} value={t}>{t}°C</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">pressione</label>
+                                                <select value={filtri.pressione} onChange={(e) => setFiltri(p => ({...p, pressione: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le pressioni</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.pressione).filter(Boolean))].sort().map(p => <option key={p} value={p}>{p} hPa</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">intensità vento</label>
+                                                <select value={filtri.vento} onChange={(e) => setFiltri(p => ({...p, vento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutti">tutte le intensità</option>
+                                                    {[...new Set(catture.map(c => c.meteo?.vento).filter(Boolean))].sort().map(v => <option key={v} value={v}>{v} km/h</option>)}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">fase lunare</label>
+                                                <select value={filtri.faseLunare} onChange={(e) => setFiltri(p => ({...p, faseLunare: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
+                                                    <option value="tutte">tutte le fasi</option>
+                                                    {fasiLunari.map(f => <option key={f} value={f}>{f}</option>)}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={() => setFiltri({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte', temperatura: 'tutte', pressione: 'tutte', vento: 'tutti', faseLunare: 'tutte' })}
+                                            className="w-full mt-4 bg-red-600 text-white py-2 rounded-lg font-bold">
+                                            reset filtri
+                                        </button>
+                                                </div>
+                                            )}
+                                    </div>
+
                                     {sessioniCompletate.length > 0 && (
                                         <div className="mb-6 bg-gray-800 rounded-lg border-2 border-green-500">
                                             <button
@@ -2141,123 +2255,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                             )}
                                         </div>
                                     )}
-                                    
-                                    <div className="bg-gray-800 rounded-lg border-2 border-purple-500 mb-6">
-                                        <button
-                                            onClick={() => setMostraFiltri(!mostraFiltri)}
-                                            className="w-full flex items-center justify-between p-4 active:bg-gray-700"
-                                        >
-                                            <h3 className="text-purple-400 font-bold text-xl">🔍 filtri ricerca</h3>
-                                            {mostraFiltri ?
-                                                <ChevronUp className="text-cyan-400" width={24} height={24} /> :
-                                                <ChevronDown className="text-cyan-400" width={24} height={24} />
-                                            }
-                                        </button>
-                                        {mostraFiltri && (
-                                            <div className="p-4 pt-0">
-                                                <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">anno</label>
-                                                <select value={filtri.anno} onChange={(e) => setFiltri(p => ({...p, anno: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutti">tutti gli anni</option>
-                                                    {getAnniDisponibili().map(a => <option key={a} value={a}>{a}</option>)}
-                                                </select>
-                                            </div>
 
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">mese</label>
-                                                <select value={filtri.mese} onChange={(e) => setFiltri(p => ({...p, mese: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutti">tutti i mesi</option>
-                                                    <option value="01">gennaio</option>
-                                                    <option value="02">febbraio</option>
-                                                    <option value="03">marzo</option>
-                                                    <option value="04">aprile</option>
-                                                    <option value="05">maggio</option>
-                                                    <option value="06">giugno</option>
-                                                    <option value="07">luglio</option>
-                                                    <option value="08">agosto</option>
-                                                    <option value="09">settembre</option>
-                                                    <option value="10">ottobre</option>
-                                                    <option value="11">novembre</option>
-                                                    <option value="12">dicembre</option>
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">specie</label>
-                                                <select value={filtri.specie} onChange={(e) => setFiltri(p => ({...p, specie: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le specie</option>
-                                                    {[...new Set(catture.map(c => c.specie).filter(Boolean))].sort().map(s => <option key={s} value={s}>{s}</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">località</label>
-                                                <select value={filtri.localita} onChange={(e) => setFiltri(p => ({...p, localita: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le località</option>
-                                                    {[...new Set(catture.map(c => c.localita).filter(Boolean))].sort().map(l => <option key={l} value={l}>{l}</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">direzione vento</label>
-                                                <select value={filtri.direzioneVento} onChange={(e) => setFiltri(p => ({...p, direzioneVento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le direzioni</option>
-                                                    {ventiRosaDeiVenti.map(v => <option key={v} value={v}>{v}</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">condizioni meteo</label>
-                                                <select value={filtri.condizioni} onChange={(e) => setFiltri(p => ({...p, condizioni: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le condizioni</option>
-                                                    {condizioniMeteo.map(c => <option key={c} value={c}>{c}</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">temperatura</label>
-                                                <select value={filtri.temperatura} onChange={(e) => setFiltri(p => ({...p, temperatura: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le temperature</option>
-                                                    {[...new Set(catture.map(c => c.meteo?.temperatura).filter(Boolean))].sort().map(t => <option key={t} value={t}>{t}°C</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">pressione</label>
-                                                <select value={filtri.pressione} onChange={(e) => setFiltri(p => ({...p, pressione: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le pressioni</option>
-                                                    {[...new Set(catture.map(c => c.meteo?.pressione).filter(Boolean))].sort().map(p => <option key={p} value={p}>{p} hPa</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">intensità vento</label>
-                                                <select value={filtri.vento} onChange={(e) => setFiltri(p => ({...p, vento: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutti">tutte le intensità</option>
-                                                    {[...new Set(catture.map(c => c.meteo?.vento).filter(Boolean))].sort().map(v => <option key={v} value={v}>{v} km/h</option>)}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-cyan-400 text-sm font-semibold mb-2">fase lunare</label>
-                                                <select value={filtri.faseLunare} onChange={(e) => setFiltri(p => ({...p, faseLunare: e.target.value}))} className="w-full bg-gray-900 border-2 border-gray-700 rounded-lg px-4 py-3 text-white">
-                                                    <option value="tutte">tutte le fasi</option>
-                                                    {fasiLunari.map(f => <option key={f} value={f}>{f}</option>)}
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <button onClick={() => setFiltri({ anno: 'tutti', mese: 'tutti', specie: 'tutte', direzioneVento: 'tutte', condizioni: 'tutte', localita: 'tutte', temperatura: 'tutte', pressione: 'tutte', vento: 'tutti', faseLunare: 'tutte' })}
-                                            className="w-full mt-4 bg-red-600 text-white py-2 rounded-lg font-bold">
-                                            reset filtri
-                                        </button>
-                                                </div>
-                                            )}
-                                    </div>
-
-                                    <button onClick={applicaFiltri} className="w-full mb-6 bg-purple-600 text-white py-3 rounded-lg font-bold">mostra registro</button>
-                                    
                                     {stats && (
                                         <div className="grid grid-cols-3 gap-4 mb-6">
                                             <div className="bg-cyan-900 rounded-lg p-4 border border-cyan-600">
