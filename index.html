@@ -515,11 +515,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 
                 const meteoSalvato = datiMeteoConfermati;
                 setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
-                
-                // Mostra automaticamente il registro dopo aver salvato
-                setMostraRegistro(true);
-                setActiveSection('analisi');
-                
+
                 setNuovaCattura({
                     data: getDataItalianaAttuale(), ora: getOraItalianaAttuale(), specie: '', peso: '', lunghezza: '',
                     localita: sessioneAttiva ? datiSessione.localita : '', latitudine: sessioneAttiva ? datiSessione.latitudine : '',
@@ -1169,10 +1165,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     // Fix: usa forma funzionale per evitare sovrascrittura con registrazioni multiple
                     setCatture(prev => [...prev, catturaFinale]);
 
-                    // Mostra registro
-                    setMostraRegistro(true);
-                    setActiveSection('analisi');
-
                     // Reset form
                     setNuovaCattura({
                         data: getDataItalianaAttuale(),
@@ -1396,14 +1388,14 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             };
 
             const getCatturePaginate = () => {
-                const filtrate = getCattureFiltrate();
+                const filtrate = getCattureFiltrate().reverse();
                 const inizio = paginaCatture * ITEMS_PER_PAGE;
                 const fine = inizio + ITEMS_PER_PAGE;
                 return filtrate.slice(inizio, fine);
             };
 
             const getSessioniPaginate = () => {
-                const filtrate = getSessioniFiltrate();
+                const filtrate = getSessioniFiltrate().reverse();
                 const inizio = paginaSessioni * ITEMS_PER_PAGE;
                 const fine = inizio + ITEMS_PER_PAGE;
                 return filtrate.slice(inizio, fine);
@@ -2280,42 +2272,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                     </div>
 
                                     {sessioniCompletate.length > 0 && (
-                                        <div className="mb-6 bg-gray-800 rounded-lg border-2 border-green-500">
-                                            <button
-                                                onClick={() => setMostraMappa(!mostraMappa)}
-                                                className="w-full flex items-center justify-between p-4 active:bg-gray-700"
-                                            >
-                                                <div className="flex-1">
-                                                    <h3 className="text-cyan-400 font-bold text-center text-xl">
-                                                        🗺️ mappa sessioni di pesca
-                                                    </h3>
-                                                    <p className="text-gray-400 text-center text-sm mt-1">
-                                                        {sessioniCompletate.length} {sessioniCompletate.length === 1 ? 'sessione registrata' : 'sessioni registrate'}
-                                                    </p>
-                                                </div>
-                                                {mostraMappa ?
-                                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
-                                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
-                                                }
-                                            </button>
-                                            {mostraMappa && (
-                                                <div className="p-4 pt-0">
-                                                    <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-3 mb-3 text-center">
-                                                        <p className="text-blue-400 text-xs">
-                                                            💡 Apri la console del browser (F12) per vedere i dettagli del caricamento
-                                                        </p>
-                                                    </div>
-                                                    <div
-                                                        id="map-container"
-                                                        className="w-full h-96 rounded-lg border-2 border-cyan-500"
-                                                        style={{minHeight: '400px'}}
-                                                    ></div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    
-                                    {sessioniCompletate.length > 0 && (
                                         <div className="mb-6 bg-gray-800 rounded-lg border-2 border-orange-500">
                                             <button
                                                 onClick={() => setMostraGestioneSessioni(!mostraGestioneSessioni)}
@@ -2364,6 +2320,28 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                                             📍 Lat: {sessione.latitudine}, Long: {sessione.longitudine}
                                                                             {!validazione.valid && <span className="ml-2">⚠️ {validazione.error}</span>}
                                                                         </p>
+                                                                        {(() => {
+                                                                            const cattureSessione = catture.filter(c => c.sessioneId === sessione.id);
+                                                                            const specieCount = {};
+                                                                            cattureSessione.forEach(c => {
+                                                                                if (c.specie) {
+                                                                                    specieCount[c.specie] = (specieCount[c.specie] || 0) + 1;
+                                                                                }
+                                                                            });
+                                                                            const specieArray = Object.entries(specieCount).sort((a, b) => b[1] - a[1]);
+                                                                            return specieArray.length > 0 && (
+                                                                                <div className="mt-2 p-2 bg-blue-900/20 border border-blue-500/50 rounded">
+                                                                                    <p className="text-blue-300 text-xs font-semibold mb-1">🐟 Specie catturate:</p>
+                                                                                    <div className="flex flex-wrap gap-1">
+                                                                                        {specieArray.map(([specie, numero]) => (
+                                                                                            <span key={specie} className="text-cyan-400 text-xs bg-cyan-900/30 px-2 py-1 rounded">
+                                                                                                {specie} ({numero})
+                                                                                            </span>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })()}
                                                                         </>
                                                                     )}
                                                                 </div>
@@ -2554,6 +2532,42 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                                             </button>
                                                         </div>
                                                     )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {sessioniCompletate.length > 0 && (
+                                        <div className="mb-6 bg-gray-800 rounded-lg border-2 border-green-500">
+                                            <button
+                                                onClick={() => setMostraMappa(!mostraMappa)}
+                                                className="w-full flex items-center justify-between p-4 active:bg-gray-700"
+                                            >
+                                                <div className="flex-1">
+                                                    <h3 className="text-cyan-400 font-bold text-center text-xl">
+                                                        🗺️ mappa sessioni di pesca
+                                                    </h3>
+                                                    <p className="text-gray-400 text-center text-sm mt-1">
+                                                        {sessioniCompletate.length} {sessioniCompletate.length === 1 ? 'sessione registrata' : 'sessioni registrate'}
+                                                    </p>
+                                                </div>
+                                                {mostraMappa ?
+                                                    <ChevronUp className="text-cyan-400" width={24} height={24} /> :
+                                                    <ChevronDown className="text-cyan-400" width={24} height={24} />
+                                                }
+                                            </button>
+                                            {mostraMappa && (
+                                                <div className="p-4 pt-0">
+                                                    <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-3 mb-3 text-center">
+                                                        <p className="text-blue-400 text-xs">
+                                                            💡 Apri la console del browser (F12) per vedere i dettagli del caricamento
+                                                        </p>
+                                                    </div>
+                                                    <div
+                                                        id="map-container"
+                                                        className="w-full h-96 rounded-lg border-2 border-cyan-500"
+                                                        style={{minHeight: '400px'}}
+                                                    ></div>
                                                 </div>
                                             )}
                                         </div>
