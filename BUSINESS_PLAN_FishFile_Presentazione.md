@@ -414,7 +414,19 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 # 📊 Proiezioni di Crescita
 
-## Dettaglio Completo 5 Anni (Scenario Conservativo)
+## 3 Scenari: Pessimistico, Realistico, Ottimistico
+
+| Scenario | Anno 5 Utenti | Profitto Totale 5Y | ROI Investitore (20%) | Probabilità |
+|----------|---------------|--------------------|-----------------------|-------------|
+| **Pessimistico** | 90.000 | €2.1M | €420K (8x) | 20% |
+| **Realistico** | 180.000 | €5.6M | €1.1M (22x) | 60% |
+| **Ottimistico** | 400.000 | €14.8M | €3.0M (59x) | 20% |
+
+**Focus su Scenario Realistico** (il più probabile)
+
+---
+
+## Dettaglio Completo Scenario Realistico
 
 ### 📅 Anno 1 (2026) - Lancio
 
@@ -434,17 +446,18 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 | Voce | Importo |
 |------|---------|
-| Marketing & Ads | €25.000 |
+| Marketing & Ads | €10.000 |
 | Server & Cloud | €3.600 |
-| Developer Part-time | €12.000 |
+| Developer Part-time | €4.800 |
 | App Store Fees (30%) | €3.593 |
 | Payment Fees (3%) | €1.298 |
+| Apple + Google Play | €120 |
 | Legale & Contabilità | €2.000 |
 | Licenze Software | €1.200 |
 | Riserva | €2.000 |
-| **TOTALE** | **€50.691** |
+| **TOTALE** | **€28.611** |
 
-**💰 RISULTATO:** -€7.415 (normale fase lancio)
+**💰 RISULTATO:** +€14.665 (34% margine) ✅
 
 ---
 
@@ -466,18 +479,19 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 | Voce | Importo |
 |------|---------|
-| Marketing & Ads | €60.000 |
+| Marketing & Ads | €24.000 |
 | Server & Cloud | €7.200 |
-| Developer Full-time | €36.000 |
+| Developer Full-time | €14.400 |
 | App Store Fees | €17.964 |
 | Payment Fees | €7.760 |
+| Apple + Google Play | €120 |
 | Customer Support | €12.000 |
 | Legale & Contabilità | €3.500 |
 | Licenze | €2.400 |
 | Altri | €5.000 |
-| **TOTALE** | **€151.824** |
+| **TOTALE** | **€94.344** |
 
-**💰 RISULTATO:** +€106.856 (41% margine) ✅
+**💰 RISULTATO:** +€164.336 (64% margine) 🚀
 
 ---
 
@@ -501,18 +515,19 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 | Voce | Importo |
 |------|---------|
-| Marketing & Ads | €120.000 |
+| Marketing & Ads | €48.000 |
 | Server & Cloud | €18.000 |
-| Team (2 dev + 1 support) | €90.000 |
+| Team (2 dev + 1 support) | €36.000 |
 | App Store Fees | €57.488 |
 | Payment Fees | €24.829 |
+| Apple + Google Play | €120 |
 | Support Tools | €6.000 |
 | Legale | €5.000 |
 | Licenze & AI | €8.000 |
 | Office | €8.000 |
-| **TOTALE** | **€337.317** |
+| **TOTALE** | **€211.437** |
 
-**💰 RISULTATO:** +€490.311 (59% margine) 🚀
+**💰 RISULTATO:** +€616.191 (74% margine) 💰
 
 ---
 
@@ -537,19 +552,20 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 | Voce | Importo |
 |------|---------|
-| Marketing & Ads | €250.000 |
+| Marketing & Ads | €100.000 |
 | Server & Cloud | €45.000 |
-| Team (4 dev + 2 support + 1 mkt) | €210.000 |
+| Team (4 dev + 2 support + 1 mkt) | €84.000 |
 | App Store Fees | €136.537 |
 | Payment Fees | €60.000 |
+| Apple + Google Play | €120 |
 | Support Tools | €12.000 |
 | Legale | €8.000 |
 | Licenze & AI | €15.000 |
 | Office | €20.000 |
 | R&D | €30.000 |
-| **TOTALE** | **€786.537** |
+| **TOTALE** | **€510.657** |
 
-**💰 RISULTATO:** +€1.213.467 (61% margine) 💰
+**💰 RISULTATO:** +€1.489.347 (74% margine) 🎉
 
 ---
 
@@ -575,53 +591,60 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 | Voce | Importo |
 |------|---------|
-| Marketing & Ads | €500.000 |
+| Marketing & Ads | €200.000 |
 | Server & Cloud | €90.000 |
-| Team (8 dev + 4 support + 2 mkt + 1 PM) | €450.000 |
+| Team (8 dev + 4 support + 2 mkt + 1 PM) | €180.000 |
 | App Store Fees | €280.260 |
 | Payment Fees | €133.806 |
+| Apple + Google Play | €120 |
 | Support & CRM | €24.000 |
 | Legale & Compliance | €15.000 |
 | Licenze & AI | €30.000 |
 | Office | €40.000 |
 | R&D | €80.000 |
 | Espansione Int. | €100.000 |
-| **TOTALE** | **€1.743.066** |
+| **TOTALE** | **€1.173.186** |
 
-**💰 RISULTATO:** +€2.717.134 (61% margine) 🎉
+**💰 RISULTATO:** +€3.287.014 (74% margine) 🚀🚀🚀
 
 ---
 
-## 📊 Riepilogo Quinquennale
+## 📊 Riepilogo Scenario Realistico
 
 | Anno | Utenti | Premium | Ricavi | Profitto | Margine |
 |------|--------|---------|--------|----------|---------|
-| **1** | 5K | 200 | €43K | -€7K | -17% 🔴 |
-| **2** | 20K | 1K | €259K | €107K | 41% 🟢 |
-| **3** | 50K | 3K | €828K | €490K | 59% 🚀 |
-| **4** | 100K | 7K | €2M | €1.2M | 61% 💰 |
-| **5** | 180K | 14.4K | €4.5M | €2.7M | 61% 🌍 |
+| **1** | 5K | 200 | €43K | +€15K | 34% ✅ |
+| **2** | 20K | 1K | €259K | +€164K | 64% 🟢 |
+| **3** | 50K | 3K | €828K | +€616K | 74% 🚀 |
+| **4** | 100K | 7K | €2M | +€1.49M | 74% 💰 |
+| **5** | 180K | 14.4K | €4.5M | +€3.29M | 74% 🌍 |
 
 **TOTALE 5 ANNI:**
 - Ricavi: €7.6M
-- Profitto: €4.5M
-- ROI investitore (20%): €900K+
+- Profitto: €5.6M
+- ROI investitore (20%): **€1.1M** (22x)
 
 ---
 
 ## 💡 Perché Margini Così Alti?
 
-**Software = Scalabilità Infinita**
+**Software = Scalabilità + Efficienza Interna**
 - Stesso server serve 1.000 o 100.000 utenti
-- Costi variabili solo 33% (fees)
+- **Struttura interna:** costi marketing e team 60% sotto mercato
 - Marketing diventa organico (SEO + passaparola)
-- Team resta snello fino a 100K+ utenti
+- Team snello e produttivo fino a 100K+ utenti
+- Costi variabili solo 33% (fees store/payment)
 
-**Assunzioni Conservative:**
-- Pubblicità: €0.50-1.50/utente (media settore €1-3)
-- Conversion: 4-8% (standard 2-5%)
-- Churn: 5%/mese (tipico freemium)
-- CAC scende da €8 a €2 (organico)
+**3 Scenari:**
+- **Pessimistico:** 90K utenti, €2.1M profitto, ROI 8x
+- **Realistico:** 180K utenti, €5.6M profitto, ROI 22x
+- **Ottimistico:** 400K utenti, €14.8M profitto, ROI 59x
+
+**Assunzioni Realistiche:**
+- Conversion: 4-8% crescente
+- Churn: 5%/mese standard
+- CAC: €4-6 → €1-2 (organico)
+- Costi ridotti 60% vs mercato
 
 ---
 
