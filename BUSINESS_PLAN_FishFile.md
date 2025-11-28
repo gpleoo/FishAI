@@ -185,61 +185,253 @@ Anche prendendo solo il **3% del mercato italiano** facciamo €180K/anno.
 
 # 📊 Numeri: Quanto Guadagneremo
 
-## Proiezioni 3 Anni (Scenario Realistico)
+## Proiezioni Dettagliate 5 Anni
 
-### Anno 1: Lancio
-| Trimestre | Utenti Totali | Paganti | Incasso/Mese | Incasso Trimestre | Costi | Profitto |
-|-----------|---------------|---------|--------------|-------------------|-------|----------|
-| Q1 | 500 | 15 | €75 | €225 | €8.000 | -€7.775 |
-| Q2 | 1.500 | 50 | €250 | €750 | €6.000 | -€5.250 |
-| Q3 | 3.000 | 100 | €500 | €1.500 | €5.000 | -€3.500 |
-| Q4 | 5.000 | 200 | €1.000 | €3.000 | €5.000 | -€2.000 |
+### 📅 Anno 1 (2026) - Lancio
 
-**Totale Anno 1:**
-- Incassi: €5.500
-- Costi: €24.000 (marketing + sviluppo)
-- **Perdita: -€18.500** ← normale, coperto dall'investimento
+**Utenti e Conversione:**
+- Utenti Totali Fine Anno: **5.000**
+- Utenti Premium: **200** (4% conversion)
+- Utenti Gratuiti: **4.800**
 
-### Anno 2: Crescita
-| Trimestre | Utenti Totali | Paganti | Incasso/Mese | Incasso Trimestre | Costi | Profitto |
-|-----------|---------------|---------|--------------|-------------------|-------|----------|
-| Q1 | 8.000 | 350 | €1.750 | €5.250 | €6.000 | -€750 |
-| Q2 | 12.000 | 550 | €2.750 | €8.250 | €6.500 | +€1.750 |
-| Q3 | 16.000 | 750 | €3.750 | €11.250 | €7.000 | +€4.250 |
-| Q4 | 20.000 | 1.000 | €5.000 | €15.000 | €7.000 | +€8.000 |
+**📈 RICAVI ANNUALI (dettaglio):**
 
-**Totale Anno 2:**
-- Incassi: €40.000
-- Costi: €26.500
-- **Profitto: +€13.500** ← in utile dal Q2!
+| Fonte Ricavo | Calcolo | Importo Annuale |
+|-------------|---------|-----------------|
+| **Abbonamenti Premium** | 200 utenti × €4.99 × 12 mesi | €11.976 |
+| **Pubblicità** (utenti free) | 4.800 utenti × €0.50/mese × 12 | €28.800 |
+| **Affiliate** Amazon/negozi | 5.000 utenti × €0.30/anno | €1.500 |
+| **Partnership** negozi | 2 partnership × €500/anno | €1.000 |
+| **TOTALE RICAVI** | | **€43.276** |
 
-### Anno 3: Profitto
-| Trimestre | Utenti Totali | Paganti | Incasso/Mese | Incasso Trimestre | Costi | Profitto |
-|-----------|---------------|---------|--------------|-------------------|-------|----------|
-| Q1 | 28.000 | 1.400 | €7.000 | €21.000 | €8.000 | €13.000 |
-| Q2 | 36.000 | 1.900 | €9.500 | €28.500 | €9.000 | €19.500 |
-| Q3 | 43.000 | 2.400 | €12.000 | €36.000 | €10.000 | €26.000 |
-| Q4 | 50.000 | 3.000 | €15.000 | €45.000 | €11.000 | €34.000 |
+**💸 COSTI ANNUALI (dettaglio):**
 
-**Totale Anno 3:**
-- Incassi: €130.500
-- Costi: €38.000
-- **Profitto: +€92.500** ← margine 71%
+| Voce di Costo | Importo Annuale |
+|---------------|-----------------|
+| **Marketing & Ads** | €25.000 |
+| **Server & Cloud** | €3.600 |
+| **Developer Part-time** | €12.000 |
+| **App Store Fees** (30% abbonamenti) | €3.593 |
+| **Payment Fees** (3% totale) | €1.298 |
+| **Legale & Contabilità** | €2.000 |
+| **Licenze Software** | €1.200 |
+| **Altri & Riserva** | €2.000 |
+| **TOTALE COSTI** | **€50.691** |
 
-## Riassunto 5 Anni
+**💰 PROFITTO ANNO 1:**
+- Ricavi: €43.276
+- Costi: €50.691
+- **PERDITA: -€7.415** ← Normale in fase lancio
 
-| Anno | Utenti | Paganti | Incassi | Costi | Profitto | Margine |
-|------|--------|---------|---------|-------|----------|---------|
-| 1 | 5.000 | 200 | €5.500 | €24.000 | -€18.500 | - |
-| 2 | 20.000 | 1.000 | €40.000 | €26.500 | €13.500 | 34% |
-| 3 | 50.000 | 3.000 | €130.500 | €38.000 | €92.500 | 71% |
-| 4 | 100.000 | 7.000 | €350.000 | €65.000 | €285.000 | 81% |
-| 5 | 180.000 | 14.000 | €700.000 | €95.000 | €605.000 | 86% |
+---
 
-**Note:**
-- Anno 1 in perdita è normale (stiamo investendo in crescita)
-- Anno 2 torniamo in profitto
-- Anno 3-5 crescita forte con margini alti (software costa poco)
+### 📅 Anno 2 (2027) - Crescita
+
+**Utenti e Conversione:**
+- Utenti Totali Fine Anno: **20.000**
+- Utenti Premium: **1.000** (5% conversion)
+- Utenti Gratuiti: **19.000**
+
+**📈 RICAVI ANNUALI (dettaglio):**
+
+| Fonte Ricavo | Calcolo | Importo Annuale |
+|-------------|---------|-----------------|
+| **Abbonamenti Premium** | 1.000 utenti × €4.99 × 12 mesi | €59.880 |
+| **Pubblicità** (utenti free) | 19.000 utenti × €0.80/mese × 12 | €182.400 |
+| **Affiliate** Amazon/negozi | 20.000 utenti × €0.50/anno | €10.000 |
+| **Partnership** negozi | 8 partnership × €800/anno | €6.400 |
+| **TOTALE RICAVI** | | **€258.680** |
+
+**💸 COSTI ANNUALI (dettaglio):**
+
+| Voce di Costo | Importo Annuale |
+|---------------|-----------------|
+| **Marketing & Ads** | €60.000 |
+| **Server & Cloud** | €7.200 |
+| **Developer Full-time** | €36.000 |
+| **App Store Fees** (30% abbonamenti) | €17.964 |
+| **Payment Fees** (3% totale) | €7.760 |
+| **Customer Support** | €12.000 |
+| **Legale & Contabilità** | €3.500 |
+| **Licenze Software** | €2.400 |
+| **Altri & Riserva** | €5.000 |
+| **TOTALE COSTI** | **€151.824** |
+
+**💰 PROFITTO ANNO 2:**
+- Ricavi: €258.680
+- Costi: €151.824
+- **PROFITTO: +€106.856** (41% margine) ✅ In utile!
+
+---
+
+### 📅 Anno 3 (2028) - Espansione
+
+**Utenti e Conversione:**
+- Utenti Totali Fine Anno: **50.000**
+- Utenti Premium: **3.000** (6% conversion)
+- Utenti Gratuiti: **47.000**
+
+**📈 RICAVI ANNUALI (dettaglio):**
+
+| Fonte Ricavo | Calcolo | Importo Annuale |
+|-------------|---------|-----------------|
+| **Abbonamenti Premium** | 3.000 utenti × €4.99 × 12 mesi | €179.640 |
+| **Abbonamenti PRO** | 100 guide × €9.99 × 12 mesi | €11.988 |
+| **Pubblicità** (utenti free) | 47.000 utenti × €1.00/mese × 12 | €564.000 |
+| **Affiliate** Amazon/negozi | 50.000 utenti × €0.80/anno | €40.000 |
+| **Partnership** negozi | 20 partnership × €1.200/anno | €24.000 |
+| **Marketplace** commissioni | Commissioni vendite usato | €8.000 |
+| **TOTALE RICAVI** | | **€827.628** |
+
+**💸 COSTI ANNUALI (dettaglio):**
+
+| Voce di Costo | Importo Annuale |
+|---------------|-----------------|
+| **Marketing & Ads** | €120.000 |
+| **Server & Cloud** | €18.000 |
+| **Team** (2 developer + 1 support) | €90.000 |
+| **App Store Fees** (30% abbonamenti) | €57.488 |
+| **Payment Fees** (3% totale) | €24.829 |
+| **Customer Support Tools** | €6.000 |
+| **Legale & Contabilità** | €5.000 |
+| **Licenze Software & AI** | €8.000 |
+| **Office & Altri** | €8.000 |
+| **TOTALE COSTI** | **€337.317** |
+
+**💰 PROFITTO ANNO 3:**
+- Ricavi: €827.628
+- Costi: €337.317
+- **PROFITTO: +€490.311** (59% margine) 🚀
+
+---
+
+### 📅 Anno 4 (2029) - Consolidamento
+
+**Utenti e Conversione:**
+- Utenti Totali Fine Anno: **100.000**
+- Utenti Premium: **7.000** (7% conversion)
+- Utenti PRO: **300** (guide professionali)
+- Utenti Gratuiti: **92.700**
+
+**📈 RICAVI ANNUALI (dettaglio):**
+
+| Fonte Ricavo | Calcolo | Importo Annuale |
+|-------------|---------|-----------------|
+| **Abbonamenti Premium** | 7.000 utenti × €4.99 × 12 mesi | €419.160 |
+| **Abbonamenti PRO** | 300 guide × €9.99 × 12 mesi | €35.964 |
+| **Pubblicità** (utenti free) | 92.700 utenti × €1.20/mese × 12 | €1.334.880 |
+| **Affiliate** Amazon/negozi | 100.000 utenti × €1.00/anno | €100.000 |
+| **Partnership** negozi | 50 partnership × €1.500/anno | €75.000 |
+| **Marketplace** commissioni | 5% su €400K vendite | €20.000 |
+| **Sponsorizzazioni** | Brand attrezzatura | €15.000 |
+| **TOTALE RICAVI** | | **€2.000.004** |
+
+**💸 COSTI ANNUALI (dettaglio):**
+
+| Voce di Costo | Importo Annuale |
+|---------------|-----------------|
+| **Marketing & Ads** | €250.000 |
+| **Server & Cloud** | €45.000 |
+| **Team** (4 developer + 2 support + 1 marketing) | €210.000 |
+| **App Store Fees** (30% abbonamenti) | €136.537 |
+| **Payment Fees** (3% totale) | €60.000 |
+| **Customer Support Tools** | €12.000 |
+| **Legale & Contabilità** | €8.000 |
+| **Licenze Software & AI** | €15.000 |
+| **Office & Operatività** | €20.000 |
+| **R&D Innovazione** | €30.000 |
+| **TOTALE COSTI** | **€786.537** |
+
+**💰 PROFITTO ANNO 4:**
+- Ricavi: €2.000.004
+- Costi: €786.537
+- **PROFITTO: +€1.213.467** (61% margine) 💰
+
+---
+
+### 📅 Anno 5 (2030) - Espansione Europa
+
+**Utenti e Conversione:**
+- Utenti Totali Fine Anno: **180.000**
+- Utenti Premium: **14.400** (8% conversion)
+- Utenti PRO: **600** (guide professionali)
+- Utenti Gratuiti: **165.000**
+
+**📈 RICAVI ANNUALI (dettaglio):**
+
+| Fonte Ricavo | Calcolo | Importo Annuale |
+|-------------|---------|-----------------|
+| **Abbonamenti Premium** | 14.400 utenti × €4.99 × 12 mesi | €862.272 |
+| **Abbonamenti PRO** | 600 guide × €9.99 × 12 mesi | €71.928 |
+| **Pubblicità** (utenti free) | 165.000 utenti × €1.50/mese × 12 | €2.970.000 |
+| **Affiliate** Amazon/negozi | 180.000 utenti × €1.20/anno | €216.000 |
+| **Partnership** negozi | 100 partnership × €2.000/anno | €200.000 |
+| **Marketplace** commissioni | 5% su €1.2M vendite | €60.000 |
+| **Sponsorizzazioni** | Brand + eventi | €50.000 |
+| **White Label** (altre app) | Licenza tecnologia voce | €30.000 |
+| **TOTALE RICAVI** | | **€4.460.200** |
+
+**💸 COSTI ANNUALI (dettaglio):**
+
+| Voce di Costo | Importo Annuale |
+|---------------|-----------------|
+| **Marketing & Ads** | €500.000 |
+| **Server & Cloud** | €90.000 |
+| **Team** (8 developer + 4 support + 2 marketing + 1 PM) | €450.000 |
+| **App Store Fees** (30% abbonamenti) | €280.260 |
+| **Payment Fees** (3% totale) | €133.806 |
+| **Customer Support Tools & CRM** | €24.000 |
+| **Legale, Contabilità, Compliance** | €15.000 |
+| **Licenze Software & AI** | €30.000 |
+| **Office & Operatività** | €40.000 |
+| **R&D Innovazione** | €80.000 |
+| **Espansione Internazionale** | €100.000 |
+| **TOTALE COSTI** | **€1.743.066** |
+
+**💰 PROFITTO ANNO 5:**
+- Ricavi: €4.460.200
+- Costi: €1.743.066
+- **PROFITTO: +€2.717.134** (61% margine) 🎉
+
+---
+
+## 📊 Riepilogo 5 Anni
+
+| Anno | Utenti | Premium | Ricavi Totali | Profitto | Margine | Status |
+|------|--------|---------|--------------|----------|---------|---------|
+| **1** | 5.000 | 200 | €43.276 | -€7.415 | -17% | 🔴 Investimento |
+| **2** | 20.000 | 1.000 | €258.680 | €106.856 | 41% | 🟢 Break-even |
+| **3** | 50.000 | 3.000 | €827.628 | €490.311 | 59% | 🚀 Crescita |
+| **4** | 100.000 | 7.000 | €2.000.004 | €1.213.467 | 61% | 💰 Scale |
+| **5** | 180.000 | 14.400 | €4.460.200 | €2.717.134 | 61% | 🌍 Europa |
+
+**TOTALE 5 ANNI:**
+- **Ricavi cumulati:** €7.589.788
+- **Profitto cumulato:** €4.520.353
+- **ROI per investitore 20%:** da €50K iniziali a €900K+ in exit
+
+---
+
+## 💡 Note Importanti
+
+**Perché margini così alti dal 2° anno?**
+- Software scala: stesso server serve 1.000 o 50.000 utenti
+- Marketing diventa organico (passaparola + SEO)
+- Team piccolo fino a 100K utenti
+- Costi variabili solo: payment fees (3%) + app store (30% su abbonamenti)
+
+**Conversion rate crescente:**
+- Anno 1: 4% (app nuova, pochi utenti)
+- Anno 2: 5% (prime recensioni positive)
+- Anno 3: 6% (features AI + community)
+- Anno 4: 7% (brand affermato)
+- Anno 5: 8% (leader di mercato)
+
+**Assunzioni conservative:**
+- Pubblicità: €0.50-1.50/utente/mese (media settore €1-3)
+- Churn: 5% mensile (standard freemium)
+- CAC: €5-8 anno 1, poi cala a €2-3 (organico)
+- No ricavi da vendita dati (possibile +€50-100K/anno)
 
 ---
 

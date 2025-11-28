@@ -414,57 +414,214 @@ Competitor hanno 3-4 di queste, noi tutte.
 
 # 📊 Proiezioni di Crescita
 
-## Scenario Base (Conservativo)
+## Dettaglio Completo 5 Anni (Scenario Conservativo)
 
-### Anno 2 (2027)
-- **Utenti:** 20.000
-- **Premium:** 1.000 (5% conversion - in miglioramento)
-- **Ricavi mensili:** €5.000
-- **Ricavi annuali:** €60.000
-- **Profitto:** €33.500 (56% margine)
+### 📅 Anno 1 (2026) - Lancio
 
-### Anno 3 (2028)
-- **Utenti:** 50.000
-- **Premium:** 3.000 (6% conversion)
-- **Ricavi mensili:** €15.000
-- **Ricavi annuali:** €180.000
-- **Profitto:** €142.000 (79% margine)
+**Utenti:** 5.000 totali | 200 Premium (4%) | 4.800 Free
 
-### Anno 4 (2029)
-- **Utenti:** 100.000
-- **Premium:** 7.000 (7% conversion)
-- **Ricavi mensili:** €35.000
-- **Ricavi annuali:** €420.000
-- **Profitto:** €355.000 (85% margine)
+**📈 RICAVI ANNUALI:**
 
-### Anno 5 (2030)
-- **Utenti:** 180.000
-- **Premium:** 14.000 (7.8% conversion)
-- **Ricavi mensili:** €70.000
-- **Ricavi annuali:** €840.000
-- **Profitto:** €745.000 (89% margine)
+| Fonte | Calcolo | Importo |
+|-------|---------|---------|
+| Abbonamenti Premium | 200 × €4.99 × 12 | €11.976 |
+| Pubblicità | 4.800 × €0.50/mese × 12 | €28.800 |
+| Affiliate | 5.000 × €0.30/anno | €1.500 |
+| Partnership | 2 × €500 | €1.000 |
+| **TOTALE** | | **€43.276** |
 
-## Scenario Ottimistico (+50% crescita)
+**💸 COSTI ANNUALI:**
 
-### Anno 3
-- **Utenti:** 75.000
-- **Ricavi:** €270.000
-- **Profitto:** €232.000
+| Voce | Importo |
+|------|---------|
+| Marketing & Ads | €25.000 |
+| Server & Cloud | €3.600 |
+| Developer Part-time | €12.000 |
+| App Store Fees (30%) | €3.593 |
+| Payment Fees (3%) | €1.298 |
+| Legale & Contabilità | €2.000 |
+| Licenze Software | €1.200 |
+| Riserva | €2.000 |
+| **TOTALE** | **€50.691** |
 
-### Anno 5
-- **Utenti:** 270.000
-- **Ricavi:** €1.260.000
-- **Profitto:** €1.134.000
+**💰 RISULTATO:** -€7.415 (normale fase lancio)
 
-## Perché Margini Così Alti?
+---
 
-**Il software scala benissimo:**
-- Server: €500-1.500/mese (fisso fino a 100K utenti)
-- Payment fees: 3% dei ricavi
-- Marketing: diventa organico dopo anno 2
-- Team: minimo fino a 50K utenti
+### 📅 Anno 2 (2027) - Crescita
 
-**Costi non crescono con utenti = margini altissimi**
+**Utenti:** 20.000 totali | 1.000 Premium (5%) | 19.000 Free
+
+**📈 RICAVI ANNUALI:**
+
+| Fonte | Calcolo | Importo |
+|-------|---------|---------|
+| Abbonamenti Premium | 1.000 × €4.99 × 12 | €59.880 |
+| Pubblicità | 19.000 × €0.80/mese × 12 | €182.400 |
+| Affiliate | 20.000 × €0.50/anno | €10.000 |
+| Partnership | 8 × €800 | €6.400 |
+| **TOTALE** | | **€258.680** |
+
+**💸 COSTI ANNUALI:**
+
+| Voce | Importo |
+|------|---------|
+| Marketing & Ads | €60.000 |
+| Server & Cloud | €7.200 |
+| Developer Full-time | €36.000 |
+| App Store Fees | €17.964 |
+| Payment Fees | €7.760 |
+| Customer Support | €12.000 |
+| Legale & Contabilità | €3.500 |
+| Licenze | €2.400 |
+| Altri | €5.000 |
+| **TOTALE** | **€151.824** |
+
+**💰 RISULTATO:** +€106.856 (41% margine) ✅
+
+---
+
+### 📅 Anno 3 (2028) - Espansione
+
+**Utenti:** 50.000 totali | 3.000 Premium (6%) + 100 PRO | 47.000 Free
+
+**📈 RICAVI ANNUALI:**
+
+| Fonte | Calcolo | Importo |
+|-------|---------|---------|
+| Abbonamenti Premium | 3.000 × €4.99 × 12 | €179.640 |
+| Abbonamenti PRO | 100 × €9.99 × 12 | €11.988 |
+| Pubblicità | 47.000 × €1.00/mese × 12 | €564.000 |
+| Affiliate | 50.000 × €0.80/anno | €40.000 |
+| Partnership | 20 × €1.200 | €24.000 |
+| Marketplace | 5% commissioni | €8.000 |
+| **TOTALE** | | **€827.628** |
+
+**💸 COSTI ANNUALI:**
+
+| Voce | Importo |
+|------|---------|
+| Marketing & Ads | €120.000 |
+| Server & Cloud | €18.000 |
+| Team (2 dev + 1 support) | €90.000 |
+| App Store Fees | €57.488 |
+| Payment Fees | €24.829 |
+| Support Tools | €6.000 |
+| Legale | €5.000 |
+| Licenze & AI | €8.000 |
+| Office | €8.000 |
+| **TOTALE** | **€337.317** |
+
+**💰 RISULTATO:** +€490.311 (59% margine) 🚀
+
+---
+
+### 📅 Anno 4 (2029) - Consolidamento
+
+**Utenti:** 100.000 totali | 7.000 Premium (7%) + 300 PRO | 92.700 Free
+
+**📈 RICAVI ANNUALI:**
+
+| Fonte | Calcolo | Importo |
+|-------|---------|---------|
+| Abbonamenti Premium | 7.000 × €4.99 × 12 | €419.160 |
+| Abbonamenti PRO | 300 × €9.99 × 12 | €35.964 |
+| Pubblicità | 92.700 × €1.20/mese × 12 | €1.334.880 |
+| Affiliate | 100.000 × €1.00/anno | €100.000 |
+| Partnership | 50 × €1.500 | €75.000 |
+| Marketplace | 5% su €400K | €20.000 |
+| Sponsorizzazioni | Brand | €15.000 |
+| **TOTALE** | | **€2.000.004** |
+
+**💸 COSTI ANNUALI:**
+
+| Voce | Importo |
+|------|---------|
+| Marketing & Ads | €250.000 |
+| Server & Cloud | €45.000 |
+| Team (4 dev + 2 support + 1 mkt) | €210.000 |
+| App Store Fees | €136.537 |
+| Payment Fees | €60.000 |
+| Support Tools | €12.000 |
+| Legale | €8.000 |
+| Licenze & AI | €15.000 |
+| Office | €20.000 |
+| R&D | €30.000 |
+| **TOTALE** | **€786.537** |
+
+**💰 RISULTATO:** +€1.213.467 (61% margine) 💰
+
+---
+
+### 📅 Anno 5 (2030) - Europa
+
+**Utenti:** 180.000 totali | 14.400 Premium (8%) + 600 PRO | 165.000 Free
+
+**📈 RICAVI ANNUALI:**
+
+| Fonte | Calcolo | Importo |
+|-------|---------|---------|
+| Abbonamenti Premium | 14.400 × €4.99 × 12 | €862.272 |
+| Abbonamenti PRO | 600 × €9.99 × 12 | €71.928 |
+| Pubblicità | 165.000 × €1.50/mese × 12 | €2.970.000 |
+| Affiliate | 180.000 × €1.20/anno | €216.000 |
+| Partnership | 100 × €2.000 | €200.000 |
+| Marketplace | 5% su €1.2M | €60.000 |
+| Sponsorizzazioni | Brand + eventi | €50.000 |
+| White Label | Licenza tech | €30.000 |
+| **TOTALE** | | **€4.460.200** |
+
+**💸 COSTI ANNUALI:**
+
+| Voce | Importo |
+|------|---------|
+| Marketing & Ads | €500.000 |
+| Server & Cloud | €90.000 |
+| Team (8 dev + 4 support + 2 mkt + 1 PM) | €450.000 |
+| App Store Fees | €280.260 |
+| Payment Fees | €133.806 |
+| Support & CRM | €24.000 |
+| Legale & Compliance | €15.000 |
+| Licenze & AI | €30.000 |
+| Office | €40.000 |
+| R&D | €80.000 |
+| Espansione Int. | €100.000 |
+| **TOTALE** | **€1.743.066** |
+
+**💰 RISULTATO:** +€2.717.134 (61% margine) 🎉
+
+---
+
+## 📊 Riepilogo Quinquennale
+
+| Anno | Utenti | Premium | Ricavi | Profitto | Margine |
+|------|--------|---------|--------|----------|---------|
+| **1** | 5K | 200 | €43K | -€7K | -17% 🔴 |
+| **2** | 20K | 1K | €259K | €107K | 41% 🟢 |
+| **3** | 50K | 3K | €828K | €490K | 59% 🚀 |
+| **4** | 100K | 7K | €2M | €1.2M | 61% 💰 |
+| **5** | 180K | 14.4K | €4.5M | €2.7M | 61% 🌍 |
+
+**TOTALE 5 ANNI:**
+- Ricavi: €7.6M
+- Profitto: €4.5M
+- ROI investitore (20%): €900K+
+
+---
+
+## 💡 Perché Margini Così Alti?
+
+**Software = Scalabilità Infinita**
+- Stesso server serve 1.000 o 100.000 utenti
+- Costi variabili solo 33% (fees)
+- Marketing diventa organico (SEO + passaparola)
+- Team resta snello fino a 100K+ utenti
+
+**Assunzioni Conservative:**
+- Pubblicità: €0.50-1.50/utente (media settore €1-3)
+- Conversion: 4-8% (standard 2-5%)
+- Churn: 5%/mese (tipico freemium)
+- CAC scende da €8 a €2 (organico)
 
 ---
 
