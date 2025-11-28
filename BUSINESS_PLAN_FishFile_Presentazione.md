@@ -384,24 +384,33 @@ Competitor hanno 3-4 di queste, noi tutte.
 - ✅ API access
 - ✅ Multi-utente
 
-## Conversione Attesa
+## Come Funziona la Conversione
 
-**Benchmark Settore:**
-- Freemium conversion: 2-5%
-- **Nostra proiezione: 3-4%** (conservativa)
+Il modello Freemium si basa su un principio semplice: offri una versione gratuita per attrarre molti utenti, poi converti una piccola percentuale a pagamento.
 
-**Esempio su 1.000 utenti:**
-```
-1.000 utenti gratuiti
-    ↓ (3.5% conversione)
-   35 utenti Premium
-    ↓
-  €175/mese da Premium
-  €100/mese da ads (utenti free)
-    ↓
-  €275/mese totale
-  €3.300/anno
-```
+**Dati del Settore:**
+Nel mercato delle app, tipicamente il **2-5% degli utenti gratuiti** decide di pagare per la versione Premium. Le app di successo come Fishbrain e FishAngler hanno tassi di conversione in questo range.
+
+**La Nostra Proiezione:**
+Stimiamo una conversione del **3-4%**, che è conservativa e in linea con il mercato.
+
+### Esempio Pratico: Cosa Succede con 1.000 Utenti
+
+Immagina di avere **1.000 pescatori** che scaricano l'app gratuitamente:
+
+**Passo 1:** Di questi 1.000 utenti gratuiti, circa **35 persone** (3.5%) decideranno di passare a Premium dopo aver provato l'assistente vocale e le funzioni avanzate.
+
+**Passo 2:** Questi 35 utenti Premium pagano €4.99 al mese ciascuno, generando:
+- **€175 al mese** da abbonamenti Premium
+
+**Passo 3:** I restanti 965 utenti gratuiti vedono pubblicità, che ci frutta:
+- **€100 al mese** da inserzioni pubblicitarie (circa €0.10 per utente)
+
+**Risultato Totale:**
+- **€275 al mese** di ricavi
+- **€3.300 all'anno** da quei 1.000 utenti iniziali
+
+**In sintesi:** Anche se solo 35 persone su 1.000 pagano, generiamo comunque ricavi significativi grazie alla combinazione di abbonamenti + pubblicità.
 
 ## Revenue Streams
 
@@ -415,6 +424,13 @@ Competitor hanno 3-4 di queste, noi tutte.
 # 📊 Proiezioni di Crescita
 
 ## Scenario Base (Conservativo)
+
+### Anno 1 (2026)
+- **Utenti:** 5.000
+- **Premium:** 250 (5% conversion)
+- **Ricavi mensili:** €1.700
+- **Ricavi annuali:** €20.400
+- **Profitto:** €7.500 (37% margine)
 
 ### Anno 2 (2027)
 - **Utenti:** 20.000
@@ -430,31 +446,22 @@ Competitor hanno 3-4 di queste, noi tutte.
 - **Ricavi annuali:** €180.000
 - **Profitto:** €142.000 (79% margine)
 
-### Anno 4 (2029)
-- **Utenti:** 100.000
-- **Premium:** 7.000 (7% conversion)
-- **Ricavi mensili:** €35.000
-- **Ricavi annuali:** €420.000
-- **Profitto:** €355.000 (85% margine)
-
-### Anno 5 (2030)
-- **Utenti:** 180.000
-- **Premium:** 14.000 (7.8% conversion)
-- **Ricavi mensili:** €70.000
-- **Ricavi annuali:** €840.000
-- **Profitto:** €745.000 (89% margine)
-
 ## Scenario Ottimistico (+50% crescita)
+
+### Anno 1
+- **Utenti:** 7.500
+- **Ricavi:** €30.600
+- **Profitto:** €16.000
+
+### Anno 2
+- **Utenti:** 30.000
+- **Ricavi:** €90.000
+- **Profitto:** €62.000
 
 ### Anno 3
 - **Utenti:** 75.000
 - **Ricavi:** €270.000
 - **Profitto:** €232.000
-
-### Anno 5
-- **Utenti:** 270.000
-- **Ricavi:** €1.260.000
-- **Profitto:** €1.134.000
 
 ## Perché Margini Così Alti?
 
