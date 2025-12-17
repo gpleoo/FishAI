@@ -1,6 +1,6 @@
 <!--
 ================================================================================
-FishAI - Diario di Pesca
+Fish File - Diario di Pesca
 ================================================================================
 
 Copyright © 2025 Giampietro Leonoro
@@ -226,11 +226,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     return [];
                 }
             });
-            
-            const [datiMeteoConfermati, setDatiMeteoConfermati] = useState(null);
-            const [mostraRegistro, setMostraRegistro] = useState(true); // Sempre visibile ora
-            const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(true); // Collassabile: gestione sessioni
-            const [mostraCatture, setMostraCatture] = useState(true); // Collassabile: mostra catture
+
+            const [mostraRegistro, setMostraRegistro] = useState(false); // Collassabile
+            const [mostraGestioneSessioni, setMostraGestioneSessioni] = useState(false); // Collassabile: gestione sessioni
+            const [mostraCatture, setMostraCatture] = useState(false); // Collassabile: mostra catture
             const [mostraSplash, setMostraSplash] = useState(true); // Splash screen iniziale
 
             // Stati collassabili per sezioni gestione
@@ -243,8 +242,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
             const [mostraPiombi, setMostraPiombi] = useState(false);
 
             // Stati collassabili per filtri e mappa
-            const [mostraFiltri, setMostraFiltri] = useState(true);
-            const [mostraMappa, setMostraMappa] = useState(true);
+            const [mostraFiltri, setMostraFiltri] = useState(false);
+            const [mostraMappa, setMostraMappa] = useState(false);
 
             // Stato collassabile per sessione di pesca
             const [mostraSessionePesca, setMostraSessionePesca] = useState(false);
@@ -279,11 +278,10 @@ Per richieste di autorizzazione, consultare il file LICENSE.
 
             // Stati Assistente Vocale
             const [assistenteVocaleAttivo, setAssistenteVocaleAttivo] = useState(false);
-            const [statoConversazione, setStatoConversazione] = useState('INATTIVO'); // INATTIVO, SPECIE, LUNGHEZZA, ESCA, CONFERMA_METEO, CONFERMA_REGISTRA
+            const [statoConversazione, setStatoConversazione] = useState('INATTIVO'); // INATTIVO, SPECIE, LUNGHEZZA, ESCA, CONFERMA_REGISTRA
             const [messaggioVocale, setMessaggioVocale] = useState('');
             const [riconoscimentoAttivo, setRiconoscimentoAttivo] = useState(false);
             const recognitionRef = useRef(null);
-            const meteoConfermatiVocaleRef = useRef(null); // Fix: per sincronizzare conferma meteo
             const datiCatturaVocaleRef = useRef({ specie: '', lunghezza: '', esca: '' }); // Fix: per sincronizzare dati cattura
             const specieMemorizzateVocaleRef = useRef([]); // Fix: per sincronizzare lista specie aggiornata
             const escheMemorizzateVocaleRef = useRef([]); // Fix: per sincronizzare lista esche aggiornata
@@ -476,17 +474,12 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     }
                 );
             };
-            const confermaDatiMeteo = () => { setDatiMeteoConfermati({...meteo}); setMessaggioErrore(''); };
             const applicaFiltri = () => setMostraRegistro(true);
 
             const aggiungiCattura = () => {
-                if (!sessioneAttiva) { 
-                    setMessaggioErrore('avvia prima una sessione di pesca'); 
-                    return; 
-                }
-                if (!datiMeteoConfermati) { 
-                    setMessaggioErrore('conferma prima i dati meteo'); 
-                    return; 
+                if (!sessioneAttiva) {
+                    setMessaggioErrore('avvia prima una sessione di pesca');
+                    return;
                 }
                 if (!nuovaCattura.specie) {
                     setMessaggioErrore('inserisci la specie della cattura');
@@ -512,9 +505,8 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 if (nuovaCattura.trave && !traviMemorizzate.includes(nuovaCattura.trave)) setTraviMemorizzate([...traviMemorizzate, nuovaCattura.trave]);
                 if (nuovaCattura.amo && !amiMemorizzati.includes(nuovaCattura.amo)) setAmiMemorizzati([...amiMemorizzati, nuovaCattura.amo]);
                 if (nuovaCattura.piombo && !piombiMemorizzati.includes(nuovaCattura.piombo)) setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
-                
-                const meteoSalvato = datiMeteoConfermati;
-                setCatture([...catture, {...nuovaCattura, meteo: {...meteoSalvato}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
+
+                setCatture([...catture, {...nuovaCattura, meteo: {...meteo}, id: Date.now(), sessioneId: sessioneCorrente.id}]);
 
                 setNuovaCattura({
                     data: getDataItalianaAttuale(), ora: getOraItalianaAttuale(), specie: '', peso: '', lunghezza: '',
@@ -522,7 +514,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                     longitudine: sessioneAttiva ? datiSessione.longitudine : '', esca: '',
                     canna: nuovaCattura.canna, trave: nuovaCattura.trave, amo: nuovaCattura.amo, piombo: nuovaCattura.piombo, note: nuovaCattura.note
                 });
-                setDatiMeteoConfermati(null);
                 
                 // Messaggio di conferma
                 alert('✅ Cattura registrata con successo!');
@@ -972,25 +963,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                                 }
                             }
 
-                            setStatoConversazione('CONFERMA_METEO');
-                            await new Promise(resolve => setTimeout(resolve, 400));
-                            await gestisciStatoConversazione('CONFERMA_METEO');
-                            break;
-
-                        case 'CONFERMA_METEO':
-                            await parla('Confermi dati meteo?');
-                            const rispostaConfermaMeteo = await ascolta();
-
-                            if (èConferma(rispostaConfermaMeteo)) {
-                                // Simula click su conferma meteo
-                                setDatiMeteoConfermati(meteo);
-                                meteoConfermatiVocaleRef.current = meteo; // Fix: salva in ref per accesso sincrono
-                                console.log('✅ Dati meteo confermati vocalmente');
-                                await parla('Dati meteo confermati');
-                            } else {
-                                await parla('Dati meteo non confermati. Puoi confermarli manualmente.');
-                            }
-
                             setStatoConversazione('CONFERMA_REGISTRA');
                             await new Promise(resolve => setTimeout(resolve, 400));
                             await gestisciStatoConversazione('CONFERMA_REGISTRA');
@@ -1094,15 +1066,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         return;
                     }
 
-                    // Fix: usa ref se disponibile (confermati vocalmente), altrimenti usa stato (confermati manualmente)
-                    const meteoSalvato = meteoConfermatiVocaleRef.current || datiMeteoConfermati;
-
-                    if (!meteoSalvato) {
-                        await parla('Errore: conferma prima i dati meteo');
-                        fermaAssistenteVocale();
-                        return;
-                    }
-
                     // Fix: usa ref se disponibile (compilato vocalmente), altrimenti usa state (compilato manualmente)
                     const specieFinale = datiCatturaVocaleRef.current.specie || nuovaCattura.specie;
 
@@ -1152,13 +1115,13 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         setPiombiMemorizzati([...piombiMemorizzati, nuovaCattura.piombo]);
                     }
 
-                    // Salva cattura con valori finali (usa meteoSalvato già dichiarato sopra)
+                    // Salva cattura con valori finali
                     const catturaFinale = {
                         ...nuovaCattura,
                         specie: specieFinale,
                         lunghezza: lunghezzaFinale,
                         esca: escaFinale,
-                        meteo: {...meteoSalvato},
+                        meteo: {...meteo},
                         id: Date.now(),
                         sessioneId: sessioneCorrente.id
                     };
@@ -1182,7 +1145,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         piombo: '',
                         note: ''
                     });
-                    setDatiMeteoConfermati(null);
 
                     // Feedback vocale
                     await parla('Cattura registrata!');
@@ -1249,7 +1211,6 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                 setStatoConversazione('INATTIVO');
                 setMessaggioVocale('');
                 setRiconoscimentoAttivo(false);
-                meteoConfermatiVocaleRef.current = null; // Reset ref meteo confermati
                 datiCatturaVocaleRef.current = { specie: '', lunghezza: '', esca: '' }; // Reset ref dati cattura vocale
             };
 
@@ -1612,7 +1573,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         }}>
                             <img
                                 src="https://github.com/gpleoo/FishAI/blob/main/splash-screen.png?raw=true"
-                                alt="FishAI Splash"
+                                alt="Fish File Splash"
                                 style={{
                                     maxWidth: '100%',
                                     maxHeight: '100%',
@@ -1628,7 +1589,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                         <div className="text-center mb-8">
                             <img
                                 src="https://github.com/gpleoo/FishAI/blob/main/logoFishAI.png?raw=true"
-                                alt="FishAI Logo"
+                                alt="Fish File Logo"
                                 className="mx-auto mb-4"
                                 style={{maxWidth: '300px', width: '100%', height: 'auto'}}
                             />
@@ -1772,9 +1733,7 @@ Per richieste di autorizzazione, consultare il file LICENSE.
                             </div>
                             
                             <SelectField label="note" value={nuovaCattura.note} onChange={(e) => setNuovaCattura(p => ({...p, note: e.target.value}))} options={noteMemorizzate} placeholder="note..." />
-                            
-                            <button onClick={confermaDatiMeteo} className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold">conferma dati meteo (obbligatorio)</button>
-                            {datiMeteoConfermati && <div className="mt-4 p-3 bg-green-900/30 border border-green-600 rounded-lg"><p className="text-green-400 text-sm font-semibold">dati meteo confermati</p></div>}
+
                             {messaggioErrore && <div className="mt-4 p-4 bg-red-900/30 border-2 border-red-600 rounded-lg"><p className="text-red-400 font-semibold text-center">{messaggioErrore}</p></div>}
                             <button onClick={aggiungiCattura} className="w-full mt-4 bg-cyan-600 text-white py-4 rounded-lg font-bold text-xl">registra cattura</button>
                         </Section>

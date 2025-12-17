@@ -1,4 +1,4 @@
-# FishFile
+# Fish File
 ## Piano di Business per Investitori
 
 **Versione:** 2.0 - Concisa
@@ -10,7 +10,7 @@
 
 # 📋 In Breve
 
-**FishFile** è la prima app italiana per pescatori con **assistente vocale intelligente**.
+**Fish File** è la prima app italiana per pescatori con **assistente vocale intelligente**.
 
 Permette di registrare le catture parlando (senza toccare il telefono), tiene traccia di attrezzatura e condizioni meteo, e suggerisce i momenti migliori per pescare.
 
@@ -35,7 +35,7 @@ I pescatori italiani (2 milioni di persone) oggi devono:
 
 # ✅ La Nostra Soluzione
 
-**FishFile** risolve tutto con una sola app in italiano che include:
+**Fish File** risolve tutto con una sola app in italiano che include:
 
 ### 🎤 Assistente Vocale (UNICO!)
 - Registri le catture **parlando** (mani libere)
@@ -72,7 +72,7 @@ I pescatori italiani (2 milioni di persone) oggi devono:
 
 ## Confronto con i Competitor
 
-| Funzione | **FishFile** | Fishbrain | FishAngler | Fishing Points |
+| Funzione | **Fish File** | Fishbrain | FishAngler | Fishing Points |
 |----------|--------------|-----------|------------|----------------|
 | **Assistente Vocale Italiano** | ✅ ✅ | ❌ | ❌ | ❌ |
 | **Riconosce Dialetti** | ✅ ✅ | ❌ | ❌ | ❌ |
@@ -567,7 +567,7 @@ L'app è **già funzionante** con:
 
 # 🎣 In Conclusione
 
-**FishFile** ha tutto per diventare l'app di riferimento per i pescatori italiani:
+**Fish File** ha tutto per diventare l'app di riferimento per i pescatori italiani:
 
 ✅ **Tecnologia Unica** - Nessuno ha voce AI in italiano
 ✅ **Mercato Grande** - 2M pescatori, €10M/anno
@@ -583,6 +583,6 @@ Investiamo insieme nel futuro della pesca italiana.
 
 ---
 
-**© 2025 FishFile - Confidenziale**
+**© 2025 Fish File - Confidenziale**
 
 *Questo documento contiene informazioni riservate. Non condividere senza autorizzazione.*
